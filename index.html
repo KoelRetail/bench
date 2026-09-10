@@ -301,33 +301,34 @@
   .mmLinks label { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-2);
                    border:1px solid var(--rule); border-radius:999px; padding:5px 11px; cursor:pointer; }
   .mmLinks input { width:14px; height:14px; accent-color:var(--accent); }
-  footer { color:var(--ink-3); font-size:12.5px; border-top:1px solid var(--rule); padding-top:16px; }
+  #manualsSection[hidden] { display:none !important; }
+    footer { color:var(--ink-3); font-size:12.5px; border-top:1px solid var(--rule); padding-top:16px; }
 </style>
 
 <div class="wrap">
 
   <header>
     <div class="eyebrow">KOEL Retail · Staging &amp; Logistics</div>
-    <h1 class="display">Palo Alto patchschema</h1>
-    <p class="lede">De bench als 3D-model dat je kunt ronddraaien. Sleep om eromheen te lopen, scroll om in te zoomen op een poort. Bijgewerkt naar de nieuwe standaard: twee Prisma SDWAN ION 1200-S routers onder twee gestackte Cisco C9200's, met de POLR-5G nu op de switch in plaats van op de router.</p>
+    <h1 class="display">Staging Bench Stores</h1>
+    <p class="lede">The store staging bench as a 3D model you can turn around. Drag to walk around it, scroll to zoom in on a port. Built to the current standard: two ION 1200-S edge routers under two stacked Cisco C9200 switches, with the POLR 5G on the switch instead of on the router.</p>
     <div class="facts">
-      <div class="fact"><b>10</b><span>patchkabels</span></div>
+      <div class="fact"><b>10</b><span>patch cables</span></div>
       <div class="fact"><b>2</b><span>ION 1200-S</span></div>
-      <div class="fact"><b>3</b><span>console-kabels</span></div>
+      <div class="fact"><b>3</b><span>console cables</span></div>
       <div class="fact"><b>3</b><span>switches</span></div>
       <div class="fact"><b>1</b><span>console server</span></div>
-      <div class="fact"><b>6</b><span>werkplekken</span></div>
+      <div class="fact"><b>6</b><span>workstations</span></div>
       <div class="fact"><b>6</b><span>registers</span></div>
       <div class="fact"><b>30</b><span>access points</span></div>
     </div>
   </header>
 
   <section>
-    <h2>De bench</h2>
+    <h2>The bench</h2>
     <div class="bar">
-      <span class="segLabel">Toon</span>
-      <div class="seg" role="group" aria-label="Filter kabels">
-        <button type="button" data-filter="all" aria-pressed="true">Alles</button>
+      <span class="segLabel">Show</span>
+      <div class="seg" role="group" aria-label="Filter cables">
+        <button type="button" data-filter="all" aria-pressed="true">All</button>
         <button type="button" data-filter="wan" aria-pressed="false">INET</button>
         <button type="button" data-filter="plr" aria-pressed="false">POLR</button>
         <button type="button" data-filter="ha" aria-pressed="false">Bypass</button>
@@ -335,30 +336,30 @@
         <button type="button" data-filter="ap" aria-pressed="false">AP's</button>
         <button type="button" data-filter="con" aria-pressed="false">Console</button>
       </div>
-      <label class="toggle"><input type="checkbox" id="fail"> Wat als D01 uitvalt?</label>
+      <label class="toggle"><input type="checkbox" id="fail"> What if D01 goes down?</label>
     </div>
 
     <figure style="margin:0;display:flex;flex-direction:column;gap:14px">
       <div id="stage" tabindex="0">
-        <button type="button" id="reset">Reset weergave</button>
+        <button type="button" id="reset">Reset view</button>
         <div id="benchName">BENCH 3</div>
-        <button type="button" id="walkBtn">Rondlopen</button>
-        <button type="button" id="soundBtn" aria-pressed="false">Geluid aan</button>
-        <button type="button" id="quizBtn">Oefenen</button>
+        <button type="button" id="walkBtn">Walk</button>
+        <button type="button" id="soundBtn" aria-pressed="false">Sound on</button>
+        <button type="button" id="quizBtn">Practise</button>
         <div id="quizBar" hidden></div>
         <div id="crosshair" hidden></div>
         <div id="usePrompt" hidden></div>
         <div id="touchPad" hidden><i></i></div>
-        <button type="button" id="touchJump" hidden aria-label="Springen">&#9650;</button>
-        <button type="button" class="navArrow left" id="prevBench" aria-label="Vorige bench">&lsaquo;</button>
-        <button type="button" class="navArrow right" id="nextBench" aria-label="Volgende bench">&rsaquo;</button>
-        <div id="focusHint" hidden>Klik in het venster om te lopen</div>
-        <div id="hint">sleep = draaien · scroll = zoomen · <b>klik op een apparaat voor de manual</b></div>
+        <button type="button" id="touchJump" hidden aria-label="Jump">&#9650;</button>
+        <button type="button" class="navArrow left" id="prevBench" aria-label="Previous bench">&lsaquo;</button>
+        <button type="button" class="navArrow right" id="nextBench" aria-label="Next bench">&rsaquo;</button>
+        <div id="focusHint" hidden>Click inside the frame to walk</div>
+        <div id="hint">drag = orbit · scroll = zoom · <b>click a device for its manual</b></div>
         <div id="manualWrap" hidden>
           <div id="manualScrim"></div>
           <article id="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle">
             <div class="holes"><i></i><i></i><i></i></div>
-            <button type="button" id="mClose" aria-label="Sluiten (X)" title="Sluiten — X of Esc">&times;</button>
+            <button type="button" id="mClose" aria-label="Close (X)" title="Close — X or Esc">&times;</button>
             <header class="sheetHead">
               <div class="mDev" id="mDev"></div>
               <h3 id="mTitle"></h3>
@@ -368,48 +369,48 @@
             <footer class="mFoot"><span id="mFootL">KOEL Retail</span><span>Manual Maker</span></footer>
           </article>
         </div>
-        <div id="fallback">De 3D-weergave kon niet laden. De kabellijst en de poortdetails hieronder werken gewoon.</div>
+        <div id="fallback">The 3D view could not load. The cable list and port details below still work.</div>
       </div>
 
-      <p class="status" id="status">Wijs een kabel aan in het model of in de lijst hieronder.</p>
+      <p class="status" id="status">Point at a cable in the model or in the list below.</p>
 
       <div class="legend">
-        <div class="key"><i style="background:#E9C21B"></i><span><b>Geel = INET</b> — internetlijn op poort 3 van elke ION</span></div>
-        <div class="key"><i style="background:#9B5FD0"></i><span><b>Paars = POLR</b> — 5G/LTE via de switch naar poort 2</span></div>
-        <div class="key"><i style="background:#D3372C"></i><span><b>Rood = bypass-paar</b> — D01 naar D02, gekruist</span></div>
-        <div class="key"><i style="background:#4FB0E5"></i><span><b>Blauw = trunk</b> — switch poort 1 naar ION poort 5</span></div>
-        <div class="key"><i style="background:#1E4E8C"></i><span><b>Donkerblauw = stack</b> — tussen de switches, achterlangs</span></div>
-        <div class="key"><i style="background:#17A2A2"></i><span><b>Turquoise = access points</b> — 30 stuks op Bench 4 naar de switches</span></div>
-        <div class="key"><i style="background:#737B85"></i><span><b>Grijs = console</b> — WTI naar de achterkant van de switches</span></div>
-        <div class="key"><i style="background:#4FA85F"></i><span><b>Groen = werkplek</b> — netwerkkabel van elke M90q</span></div>
+        <div class="key"><i style="background:#E9C21B"></i><span><b>Yellow = INET</b> — internet line on port 3 of each ION</span></div>
+        <div class="key"><i style="background:#9B5FD0"></i><span><b>Purple = POLR</b> — 5G/LTE via the switch to port 2</span></div>
+        <div class="key"><i style="background:#D3372C"></i><span><b>Red = bypass pair</b> — D01 to D02, crossed over</span></div>
+        <div class="key"><i style="background:#4FB0E5"></i><span><b>Blue = trunk</b> — switch port 1 to ION port 5</span></div>
+        <div class="key"><i style="background:#1E4E8C"></i><span><b>Dark blue = stack</b> — between the switches, round the back</span></div>
+        <div class="key"><i style="background:#17A2A2"></i><span><b>Turquoise = access points</b> — 30 of them on Bench 4 to the switches</span></div>
+        <div class="key"><i style="background:#737B85"></i><span><b>Grey = console</b> — WTI to the back of the switches</span></div>
+        <div class="key"><i style="background:#4FA85F"></i><span><b>Green = workstation</b> — network cable from each M90q</span></div>
       </div>
 
       <ol class="keys">
-        <li><b>INET-invoer</b> — hier komen INET1 en INET2 binnen, elk naar poort 3 van zijn ION</li>
-        <li><b>Cradlepoint</b> — de POLR 5G/LTE. Gaat nu naar poort 4 van X01-1, niet meer naar de router</li>
-        <li><b>D01</b> — Palo Alto Prisma SDWAN ION 1200-S, EDGE Router-1 (aanname: de bovenste)</li>
-        <li><b>D02</b> — Palo Alto Prisma SDWAN ION 1200-S, EDGE Router-2</li>
-        <li><b>WTI console server</b> — out-of-band beheer; drie console-kabels achterlangs naar de switches</li>
+        <li><b>INET entry</b> — where INET1 and INET2 come in, each to port 3 of its ION</li>
+        <li><b>Cradlepoint</b> — the POLR 5G/LTE. Now goes to port 4 of X01-1, no longer to the router</li>
+        <li><b>D01</b> — ION 1200-S, EDGE Router-1 (assumed to be the top one)</li>
+        <li><b>D02</b> — ION 1200-S, EDGE Router-2</li>
+        <li><b>WTI console server</b> — out-of-band management; three console cables round the back to the switches</li>
         <li><b>X01-1</b> — EDGE site MDF Switch-1 (Cisco C9200)</li>
-        <li><b>X01-2</b> — EDGE site MDF Switch-2 (Cisco C9200), gestackt met X01-1</li>
-        <li><b>Derde Cisco</b> — staat niet in de nieuwe tekening, wel aan de console server en aan de access points</li>
+        <li><b>X01-2</b> — EDGE site MDF Switch-2 (Cisco C9200), stacked with X01-1</li>
+        <li><b>Third Cisco</b> — not on the new drawing, but wired to the console server and to the access points</li>
       </ol>
 
-      <figcaption><b>De bovenste plank:</b> drie Lenovo-monitors aan de voorkant en drie aan de achterkant. Achter elk scherm hangt een Lenovo M90q in een VESA-beugel. Ga er met je muis overheen en de pc schuift eruit en komt plat op de plank te liggen — met de groene netwerkkabel en de oranje USB image-stick er nog in. Zo zie je meteen waar hij in moet en hoe hij eruit komt. Op <b>Bench 4</b> staan zes Toshiba all-in-one kassa's, ook drie voor en drie achter — ga daar met je muis overheen en het scherm kantelt op zijn scharnier. Op de plank eronder liggen de dertig access points, per twee gestapeld. <b>Bench 5</b> heeft boven de iMac en de Mac mini met zijn eigen scherm, en op de plank eronder drie HP printers plus de Zebra ZT411. Wijs ze aan voor hun naam.</figcaption>
+      <figcaption><b>The top shelf:</b> three Lenovo monitors at the front and three at the back. Behind every screen sits a Lenovo M90q in a VESA bracket. Hover over one and the PC slides out and lies flat on the shelf — with the green network cable and the orange USB imaging stick still in it. That shows at a glance where it goes and how it comes out. On <b>Bench 4</b> stand six Toshiba all-in-one registers, again three at the front and three at the back — hover over one and the screen tilts on its hinge. The shelf below holds the thirty access points, stacked in pairs. <b>Bench 5</b> has the iMac and the Mac mini with its own screen on top, and three HP printers plus the Zebra ZT411 on the shelf below. Point at one for its name.</figcaption>
 
-      <figcaption>De kleuren zijn de afspraak, niet wat er nu op de bench hangt. Bij het herbouwen naar deze standaard is dit de kleurcode om aan te houden.</figcaption>
+      <figcaption>The colours are the agreed convention, not what is currently on the bench. When rebuilding to this standard, this is the colour code to follow.</figcaption>
     </figure>
   </section>
 
   <section id="manualsSection" hidden>
     <h2>Manuals</h2>
-    <p class="lede" style="font-size:14.5px">Wat je hier schrijft staat in de opslag van deze pagina zelf. Klik je in het model op het apparaat waar hij aan hangt, dan komt precies deze tekst als blad tevoorschijn — bij iedereen die de link opent.</p>
+    <p class="lede" style="font-size:14.5px">Whatever you write here is stored with the page itself. Click the device it belongs to in the model and exactly this text appears as a sheet — for everyone who opens the link.</p>
     <div class="mmGrid">
       <div class="mmCol">
         <div class="mmBar">
           <span class="segLabel">Manuals</span>
-          <button type="button" class="mmBtn" id="mmNew">+ Nieuw</button>
-          <button type="button" class="mmBtn" id="mmImport">Importeren</button>
+          <button type="button" class="mmBtn" id="mmNew">+ New</button>
+          <button type="button" class="mmBtn" id="mmImport">Import</button>
         </div>
         <ul class="mmList" id="mmList"></ul>
         <div class="mmNote" id="mmState"></div>
@@ -417,29 +418,29 @@
       <div class="mmCol">
         <div id="mmEditor" hidden>
           <div class="mmRow">
-            <label>Titel<input type="text" id="mmTitle" placeholder="Staging PC NIKE"></label>
+            <label>Title<input type="text" id="mmTitle" placeholder="Staging PC NIKE"></label>
           </div>
           <div class="mmRow mmRow2">
-            <label>Merk<input type="text" id="mmBrand" placeholder="KOEL Retail"></label>
-            <label>Versie<input type="text" id="mmVersion" placeholder="1.0"></label>
+            <label>Brand<input type="text" id="mmBrand" placeholder="KOEL Retail"></label>
+            <label>Version<input type="text" id="mmVersion" placeholder="1.0"></label>
           </div>
-          <div class="mmSub">Stappen</div>
+          <div class="mmSub">Steps</div>
           <div id="mmSteps"></div>
-          <button type="button" class="mmBtn" id="mmAddStep">+ Stap</button>
-          <div class="mmSub">Hangt aan</div>
+          <button type="button" class="mmBtn" id="mmAddStep">+ Step</button>
+          <div class="mmSub">Attached to</div>
           <div class="mmLinks" id="mmLinks"></div>
           <div class="mmBar mmBarEnd">
-            <button type="button" class="mmBtn mmDanger" id="mmDelete">Verwijderen</button>
-            <button type="button" class="mmBtn mmPrimary" id="mmSave">Opslaan</button>
+            <button type="button" class="mmBtn mmDanger" id="mmDelete">Delete</button>
+            <button type="button" class="mmBtn mmPrimary" id="mmSave">Save</button>
           </div>
         </div>
-        <div id="mmEmpty" class="mmNote">Kies links een manual, of maak een nieuwe.</div>
+        <div id="mmEmpty" class="mmNote">Pick a manual on the left, or create a new one.</div>
         <div id="mmPaste" hidden>
-          <div class="mmSub">Plak de JSON uit Manual Maker</div>
+          <div class="mmSub">Paste the JSON from Manual Maker</div>
           <textarea id="mmJson" rows="9" placeholder='{"title":"...","steps":[{"title":"...","body":"..."}]}'></textarea>
           <div class="mmBar mmBarEnd">
-            <button type="button" class="mmBtn" id="mmPasteCancel">Annuleren</button>
-            <button type="button" class="mmBtn mmPrimary" id="mmPasteOk">Toevoegen</button>
+            <button type="button" class="mmBtn" id="mmPasteCancel">Cancel</button>
+            <button type="button" class="mmBtn mmPrimary" id="mmPasteOk">Add</button>
           </div>
         </div>
       </div>
@@ -447,35 +448,35 @@
   </section>
 
   <section>
-    <h2>Welke poort precies</h2>
+    <h2>Which port exactly</h2>
     <div class="faces">
-      <div class="face"><h3>ION 1200-S — voorkant</h3><svg id="facePa" viewBox="0 0 640 230" role="img" aria-label="Voorkant van een Palo Alto Prisma SDWAN ION 1200-S met tien netwerkpoorten in vijf kolommen van twee. Poort 1 en 4 vormen het bypass-paar naar de andere ION, poort 2 krijgt de POLR van de switch, poort 3 de internetlijn en poort 5 de trunk van de switch."></svg></div>
-      <div class="face"><h3>Cisco C9200 — voorkant</h3><svg id="faceSw" viewBox="0 0 640 230" role="img" aria-label="Voorkant van een Cisco C9200 met 48 poorten in twee rijen. Poort 1 gaat als trunk naar poort 5 van de ION, poort 4 is de POLR-invoer van de 5G-router en poort 5 gaat als POLR naar poort 2 van de ION."></svg></div>
+      <div class="face"><h3>ION 1200-S — front</h3><svg id="facePa" viewBox="0 0 640 230" role="img" aria-label="Front of an ION 1200-S with ten network ports in five columns of two. Ports 1 and 4 form the bypass pair to the other ION, port 2 takes the POLR from the switch, port 3 the internet line and port 5 the trunk from the switch."></svg></div>
+      <div class="face"><h3>Cisco C9200 — front</h3><svg id="faceSw" viewBox="0 0 640 230" role="img" aria-label="Front of a Cisco C9200 with 48 ports in two rows. Port 1 goes as a trunk to port 5 of the ION, port 4 is the POLR input from the 5G router and port 5 carries the POLR to port 2 of the ION."></svg></div>
     </div>
-    <figcaption><b>Zo lees je de nummers:</b> op allebei staan de poorten per kolom onder elkaar — kolom 1 is poort 1 (boven) en 2 (onder), kolom 2 is 3 en 4, enzovoort. Dat komt overeen met de faceplate-foto van de ION 1200-S. Het rode kader zit om poort 3 en 4 — zo staat het op het apparaat zelf gedrukt. De kabels in dit model lopen echter via poort 1 en 4, want dat is wat de lijnen in de tekening doen; zie punt 03 hieronder.</figcaption>
+    <figcaption><b>How to read the numbers:</b> on both, the ports run in columns — column 1 is port 1 (top) and 2 (bottom), column 2 is 3 and 4, and so on. That matches the faceplate photo of the ION 1200-S. The red frame sits around ports 3 and 4 — that is how it is printed on the device itself. The cables in this model run via ports 1 and 4 though, because that is what the lines on the drawing do; see point 03 below.</figcaption>
   </section>
 
   <section>
-    <h2>Kabellijst</h2>
+    <h2>Cable list</h2>
     <div class="sched">
       <div class="scroll">
         <table id="sched">
-          <thead><tr><th>#</th><th>Kant A</th><th>Poort</th><th>Kant B</th><th>Poort</th><th>Functie</th><th>Kabel</th></tr></thead>
+          <thead><tr><th>#</th><th>Side A</th><th>Port</th><th>Side B</th><th>Port</th><th>Function</th><th>Cable</th></tr></thead>
           <tbody>
-            <tr data-cable="w1" tabindex="0"><td class="n">1</td><td class="dev2">Palo Alto ION D01</td><td class="port">3</td><td class="dev2">INET1 (internetlijn)</td><td class="port">—</td><td class="role">internet</td><td><span class="swatch" style="background:#E9C21B"></span></td></tr>
-            <tr data-cable="w2" tabindex="0"><td class="n">2</td><td class="dev2">Palo Alto ION D02</td><td class="port">3</td><td class="dev2">INET2 (internetlijn)</td><td class="port">—</td><td class="role">internet</td><td><span class="swatch" style="background:#E9C21B"></span></td></tr>
-            <tr data-cable="p0" tabindex="0" class="grp"><td class="n">3</td><td class="dev2">POLR 5G/LTE</td><td class="port">—</td><td class="dev2">Cisco X01-1</td><td class="port">4</td><td class="role">POLR binnen</td><td><span class="swatch" style="background:#9B5FD0"></span></td></tr>
-            <tr data-cable="p1" tabindex="0"><td class="n">4</td><td class="dev2">Cisco X01-1</td><td class="port">5</td><td class="dev2">Palo Alto ION D01</td><td class="port">2</td><td class="role">POLR</td><td><span class="swatch" style="background:#9B5FD0"></span></td></tr>
-            <tr data-cable="p2" tabindex="0"><td class="n">5</td><td class="dev2">Cisco X01-2</td><td class="port">5</td><td class="dev2">Palo Alto ION D02</td><td class="port">2</td><td class="role">POLR</td><td><span class="swatch" style="background:#9B5FD0"></span></td></tr>
-            <tr data-cable="t1" tabindex="0" class="grp"><td class="n">6</td><td class="dev2">Cisco X01-1</td><td class="port">1</td><td class="dev2">Palo Alto ION D01</td><td class="port">5</td><td class="role">trunk</td><td><span class="swatch" style="background:#4FB0E5"></span></td></tr>
-            <tr data-cable="t2" tabindex="0"><td class="n">7</td><td class="dev2">Cisco X01-2</td><td class="port">1</td><td class="dev2">Palo Alto ION D02</td><td class="port">5</td><td class="role">trunk</td><td><span class="swatch" style="background:#4FB0E5"></span></td></tr>
-            <tr data-cable="h1" tabindex="0" class="grp"><td class="n">8</td><td class="dev2">Palo Alto ION D01</td><td class="port">1</td><td class="dev2">Palo Alto ION D02</td><td class="port">4</td><td class="role">bypass-paar</td><td><span class="swatch" style="background:#D3372C"></span></td></tr>
-            <tr data-cable="h2" tabindex="0"><td class="n">9</td><td class="dev2">Palo Alto ION D01</td><td class="port">4</td><td class="dev2">Palo Alto ION D02</td><td class="port">1</td><td class="role">bypass-paar</td><td><span class="swatch" style="background:#D3372C"></span></td></tr>
+            <tr data-cable="w1" tabindex="0"><td class="n">1</td><td class="dev2">ION D01</td><td class="port">3</td><td class="dev2">INET1 (internet line)</td><td class="port">—</td><td class="role">internet</td><td><span class="swatch" style="background:#E9C21B"></span></td></tr>
+            <tr data-cable="w2" tabindex="0"><td class="n">2</td><td class="dev2">ION D02</td><td class="port">3</td><td class="dev2">INET2 (internet line)</td><td class="port">—</td><td class="role">internet</td><td><span class="swatch" style="background:#E9C21B"></span></td></tr>
+            <tr data-cable="p0" tabindex="0" class="grp"><td class="n">3</td><td class="dev2">POLR 5G/LTE</td><td class="port">—</td><td class="dev2">Cisco X01-1</td><td class="port">4</td><td class="role">POLR in</td><td><span class="swatch" style="background:#9B5FD0"></span></td></tr>
+            <tr data-cable="p1" tabindex="0"><td class="n">4</td><td class="dev2">Cisco X01-1</td><td class="port">5</td><td class="dev2">ION D01</td><td class="port">2</td><td class="role">POLR</td><td><span class="swatch" style="background:#9B5FD0"></span></td></tr>
+            <tr data-cable="p2" tabindex="0"><td class="n">5</td><td class="dev2">Cisco X01-2</td><td class="port">5</td><td class="dev2">ION D02</td><td class="port">2</td><td class="role">POLR</td><td><span class="swatch" style="background:#9B5FD0"></span></td></tr>
+            <tr data-cable="t1" tabindex="0" class="grp"><td class="n">6</td><td class="dev2">Cisco X01-1</td><td class="port">1</td><td class="dev2">ION D01</td><td class="port">5</td><td class="role">trunk</td><td><span class="swatch" style="background:#4FB0E5"></span></td></tr>
+            <tr data-cable="t2" tabindex="0"><td class="n">7</td><td class="dev2">Cisco X01-2</td><td class="port">1</td><td class="dev2">ION D02</td><td class="port">5</td><td class="role">trunk</td><td><span class="swatch" style="background:#4FB0E5"></span></td></tr>
+            <tr data-cable="h1" tabindex="0" class="grp"><td class="n">8</td><td class="dev2">ION D01</td><td class="port">1</td><td class="dev2">ION D02</td><td class="port">4</td><td class="role">bypass pair</td><td><span class="swatch" style="background:#D3372C"></span></td></tr>
+            <tr data-cable="h2" tabindex="0"><td class="n">9</td><td class="dev2">ION D01</td><td class="port">4</td><td class="dev2">ION D02</td><td class="port">1</td><td class="role">bypass pair</td><td><span class="swatch" style="background:#D3372C"></span></td></tr>
             <tr data-cable="ap" tabindex="0" class="grp"><td class="n">10</td><td class="dev2">30× Cisco 9120 AP (Bench 4)</td><td class="port">1</td><td class="dev2">X01-1 · X01-2 · 3e Cisco</td><td class="port">11-20 · 11-20 · 5-20</td><td class="role">access points</td><td><span class="swatch" style="background:#17A2A2"></span></td></tr>
             <tr data-cable="st" tabindex="0" class="grp"><td class="n">11</td><td class="dev2">Cisco X01-1</td><td class="port">stack</td><td class="dev2">Cisco X01-2</td><td class="port">stack</td><td class="role">stack</td><td><span class="swatch" style="background:#1E4E8C"></span></td></tr>
             <tr data-cable="c1" tabindex="0" class="grp"><td class="n">12</td><td class="dev2">WTI console server</td><td class="port">?</td><td class="dev2">Cisco X01-1</td><td class="port">console</td><td class="role">out-of-band</td><td><span class="swatch" style="background:#737B85"></span></td></tr>
             <tr data-cable="c2" tabindex="0"><td class="n">13</td><td class="dev2">WTI console server</td><td class="port">?</td><td class="dev2">Cisco X01-2</td><td class="port">console</td><td class="role">out-of-band</td><td><span class="swatch" style="background:#737B85"></span></td></tr>
-            <tr data-cable="c3" tabindex="0"><td class="n">14</td><td class="dev2">WTI console server</td><td class="port">?</td><td class="dev2">Derde Cisco</td><td class="port">console</td><td class="role">out-of-band</td><td><span class="swatch" style="background:#737B85"></span></td></tr>
+            <tr data-cable="c3" tabindex="0"><td class="n">14</td><td class="dev2">WTI console server</td><td class="port">?</td><td class="dev2">Third Cisco</td><td class="port">console</td><td class="role">out-of-band</td><td><span class="swatch" style="background:#737B85"></span></td></tr>
           </tbody>
         </table>
       </div>
@@ -483,44 +484,44 @@
   </section>
 
   <section>
-    <h2>Voor je begint te prikken</h2>
+    <h2>Before you start patching</h2>
     <div class="checks">
       <div class="check"><div class="idx">01</div><div>
-        <h3>Plak eerst de labels erop</h3>
-        <p>Van buiten zijn de twee ION 1200-S'en niet uit elkaar te houden, en er staan drie identieke Cisco's naast elkaar. Het model gaat uit van bovenste = D01 en X01-1. Controleer dat één keer in Prisma en op de switch, en plak er daarna labeltape op.</p>
+        <h3>Label them first</h3>
+        <p>From the outside the two ION 1200-S units are indistinguishable, and there are three identical Cisco switches side by side. The model assumes top = D01 and X01-1. Verify that once on the controller and on the switch, then put label tape on them.</p>
       </div></div>
       <div class="check"><div class="idx">02</div><div>
-        <h3>De twee bypass-kabels lopen gekruist</h3>
-        <p>Niet 1 op 1 en 4 op 4, maar <code>D01 poort 1 → D02 poort 4</code> en <code>D01 poort 4 → D02 poort 1</code>. Draai het model opzij, dan zie je de kruising zitten. Dit is de plek waar het in de praktijk misgaat.</p>
+        <h3>The two bypass cables cross over</h3>
+        <p>Not 1 to 1 and 4 to 4, but <code>D01 port 1 → D02 port 4</code> en <code>D01 port 4 → D02 port 1</code>. Turn the model side on and you can see the crossover. This is where it goes wrong in practice.</p>
       </div></div>
       <div class="check"><div class="idx">03</div><div>
-        <h3>Welk poortnummer is het bypass-paar?</h3>
-        <p>De tekening zet de stippellijn om poort 1 en 4, maar de notitie ernaast zegt <code>Port 3 &amp; 4 are Bypass pair</code>. Dat spreekt elkaar tegen. Poort 3 is in dezelfde tekening de INET-poort, dus vraag dit na voordat je prikt — ik heb 1 en 4 aangehouden omdat de lijnen in de tekening daar naartoe lopen.</p>
+        <h3>Which port number is the bypass pair?</h3>
+        <p>The drawing puts the dotted line around ports 1 and 4, but the note beside it says <code>Port 3 &amp; 4 are Bypass pair</code>. Those contradict each other. Port 3 is the INET port on the same drawing, so check this before you patch — 1 and 4 were used here because that is where the lines on the drawing go.</p>
       </div></div>
       <div class="check"><div class="idx">04</div><div>
-        <h3>POLR komt op poort 4 binnen, maar niet overal</h3>
-        <p>De tekening zegt het er zelf bij: <em>POLR Termination port 4 is new standard and it will be 9 in most of the existing sites</em>. Kijk dus eerst of jullie site al op de nieuwe standaard zit voordat je de 5G op poort 4 prikt.</p>
+        <h3>POLR lands on port 4, but not everywhere</h3>
+        <p>The drawing says so itself: <em>POLR Termination port 4 is new standard and it will be 9 in most of the existing sites</em>. So check whether your site is already on the new standard before you patch the 5G into port 4.</p>
       </div></div>
       <div class="check"><div class="idx">05</div><div>
-        <h3>De HA VLAN zit in dezelfde trunk-lijst</h3>
-        <p>VLAN 20 staat als eerste in de toegestane VLAN's van de trunk én is los gelabeld als HA Vlan. Uit de tekening is niet te lezen of dat één trunkkabel is of een tweede aparte kabel naar dezelfde ION. Ik heb het als één trunk gemodelleerd — als het er twee zijn, geef het door en ik pas het aan.</p>
+        <h3>The HA VLAN is in the same trunk list</h3>
+        <p>VLAN 20 is first in the trunk allowed list and is also labelled separately as HA Vlan. The drawing does not make clear whether that is one trunk cable or a second separate cable to the same ION. It is modelled here as one trunk — if it is two, say so and it can be changed.</p>
       </div></div>
       <div class="check"><div class="idx">06</div><div>
-        <h3>De POLR komt maar op één switch binnen</h3>
-        <p>De 5G gaat alleen naar X01-1 poort 4 en bereikt X01-2 via de stack. Valt de stack weg, dan verliest D02 zijn POLR-pad terwijl D01 hem nog wel heeft. Houd daar rekening mee bij onderhoud aan de stack.</p>
+        <h3>The POLR only lands on one switch</h3>
+        <p>The 5G only goes to X01-1 port 4 and reaches X01-2 over the stack. If the stack drops, D02 loses its POLR path while D01 still has it. Keep that in mind when maintaining the stack.</p>
       </div></div>
       <div class="check"><div class="idx">07</div><div>
-        <h3>Vul de AP-poorten in vaste volgorde</h3>
-        <p>De dertig Cisco 9120's liggen per twee gestapeld op de middelste plank van Bench 4 en gaan op X01-1 poort 11 t/m 20, X01-2 poort 11 t/m 20 en pas als je daarmee niet uitkomt op de derde Cisco poort 5 t/m 20. Houd die volgorde aan en prik van laag naar hoog, dan is later aan het poortnummer te zien welke AP waar hoort.</p>
+        <h3>Fill the AP ports in a fixed order</h3>
+        <p>The thirty Cisco 9120s lie stacked in pairs on the middle shelf of Bench 4 and go on X01-1 ports 11 to 20, X01-2 ports 11 to 20, and only if that is not enough on the third Cisco, ports 5 to 20. Keep that order and patch low to high, so later the port number tells you which AP belongs where.</p>
       </div></div>
       <div class="check"><div class="idx">08</div><div>
-        <h3>De WTI en de derde Cisco staan niet in de nieuwe tekening</h3>
-        <p>Ze staan wel op de bench en de console server hangt aan alle drie de switches. Welke WTI-poort naar welke switch gaat staat nergens — zet dat als poortnaam in de WTI-config, want juist als een switch onbereikbaar is wil je niet gokken.</p>
+        <h3>The WTI and the third Cisco are not on the new drawing</h3>
+        <p>They are on the bench though, and the console server is wired to all three switches. Which WTI port goes to which switch is written down nowhere — put that in the WTI config as the port name, because when a switch is unreachable is exactly when you do not want to guess.</p>
       </div></div>
     </div>
   </section>
 
-  <footer>3D-model gebouwd naar de foto's van de bench · bekabeling naar de tekening “Palo Alto Prisma SDWAN Edge Site — Standard” · 10 patchkabels + 3 console-kabels</footer>
+  <footer>3D model built from photographs of the bench · cabling per the edge site standard drawing · 10 patch cables + 3 console cables</footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -532,7 +533,7 @@
 var COL = {
   wan:'#E9C21B', wanD:'#B08F06',      // INET1 / INET2, de internetlijnen
   plr:'#9B5FD0', plrD:'#5F2F8C',      // POLR 5G/LTE
-  ha:'#D3372C',  haD:'#96201A',       // bypass-paar tussen de twee ION's
+  ha:'#D3372C',  haD:'#96201A',       // bypass pair tussen de twee ION's
   lan:'#4FB0E5', lanD:'#2A7CAB',      // trunk switch <-> ION
   stk:'#1E4E8C', stkD:'#12305B',      // stack tussen de twee switches
   ap:'#17A2A2',  apD:'#0C6060',       // access points op de vloer
@@ -540,16 +541,16 @@ var COL = {
   orange:'#FA582D'
 };
 var CABLES = [
-  { id:'w1', kind:'wan', owner:['pa1','wan'], label:'D01 poort 3  \u2192  INET1' },
-  { id:'w2', kind:'wan', owner:['pa2','wan'], label:'D02 poort 3  \u2192  INET2' },
-  { id:'p0', kind:'plr', owner:['cp','sw1'],  label:'POLR 5G/LTE  \u2192  X01-1 poort 4   (was poort 9 op bestaande sites)' },
-  { id:'p1', kind:'plr', owner:['pa1','sw1'], label:'X01-1 poort 5  \u2192  D01 poort 2   (POLR)' },
-  { id:'p2', kind:'plr', owner:['pa2','sw2'], label:'X01-2 poort 5  \u2192  D02 poort 2   (POLR)' },
-  { id:'t1', kind:'lan', owner:['pa1','sw1'], label:'X01-1 poort 1  \u2192  D01 poort 5   (trunk \u2014 VLAN 20, 5, 7, 10, 15, 28, 29, 601, 1101, 2291)' },
-  { id:'t2', kind:'lan', owner:['pa2','sw2'], label:'X01-2 poort 1  \u2192  D02 poort 5   (trunk \u2014 zelfde VLAN-lijst)' },
-  { id:'h1', kind:'ha',  owner:['pa1','pa2'], label:'D01 poort 1  \u2192  D02 poort 4   (bypass-paar, gekruist)' },
-  { id:'h2', kind:'ha',  owner:['pa1','pa2'], label:'D01 poort 4  \u2192  D02 poort 1   (bypass-paar, gekruist)' },
-  { id:'ap', kind:'ap',  owner:['sw1','sw2','sw3'], label:'30\u00d7 Cisco 9120 access point \u2192 X01-1 poort 11-20, X01-2 poort 11-20, derde Cisco poort 5-20' },
+  { id:'w1', kind:'wan', owner:['pa1','wan'], label:'D01 port 3  \u2192  INET1' },
+  { id:'w2', kind:'wan', owner:['pa2','wan'], label:'D02 port 3  \u2192  INET2' },
+  { id:'p0', kind:'plr', owner:['cp','sw1'],  label:'POLR 5G/LTE  \u2192  X01-1 port 4   (was port 9 on existing sites)' },
+  { id:'p1', kind:'plr', owner:['pa1','sw1'], label:'X01-1 port 5  \u2192  D01 port 2   (POLR)' },
+  { id:'p2', kind:'plr', owner:['pa2','sw2'], label:'X01-2 port 5  \u2192  D02 port 2   (POLR)' },
+  { id:'t1', kind:'lan', owner:['pa1','sw1'], label:'X01-1 port 1  \u2192  D01 port 5   (trunk \u2014 VLAN 20, 5, 7, 10, 15, 28, 29, 601, 1101, 2291)' },
+  { id:'t2', kind:'lan', owner:['pa2','sw2'], label:'X01-2 port 1  \u2192  D02 port 5   (trunk \u2014 same VLAN list)' },
+  { id:'h1', kind:'ha',  owner:['pa1','pa2'], label:'D01 port 1  \u2192  D02 port 4   (bypass pair, crossed)' },
+  { id:'h2', kind:'ha',  owner:['pa1','pa2'], label:'D01 port 4  \u2192  D02 port 1   (bypass pair, crossed)' },
+  { id:'ap', kind:'ap',  owner:['sw1','sw2','sw3'], label:'30\u00d7 Cisco 9120 access point \u2192 X01-1 port 11-20, X01-2 port 11-20, third Cisco port 5-20' },
   { id:'st', kind:'stk', owner:['sw1','sw2'], label:'X01-1  \u2192  X01-2   (stack, achterkant)' },
   { id:'c1', kind:'con', owner:['wti','sw1'], label:'WTI console server  \u2192  X01-1 console (achterkant)' },
   { id:'c2', kind:'con', owner:['wti','sw2'], label:'WTI console server  \u2192  X01-2 console (achterkant)' },
@@ -901,16 +902,16 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
   });
   DEV.wan = { mesh:wanBox, extra:wanJacks };
 
-  var DEV_NAME = { pa1:'Palo Alto ION D01', pa2:'Palo Alto ION D02', sw1:'Cisco X01-1',
-                   sw2:'Cisco X01-2', sw3:'Derde Cisco', wti:'WTI console server',
-                   cp:'Cradlepoint POLR 5G', wan:'INET-invoer' };
+  var DEV_NAME = { pa1:'ION D01', pa2:'ION D02', sw1:'Cisco X01-1',
+                   sw2:'Cisco X01-2', sw3:'Third Cisco', wti:'WTI console server',
+                   cp:'Cradlepoint POLR 5G', wan:'INET entry' };
   Object.keys(DEV).forEach(function (k) {
     DEV[k].mesh.userData.man = { key:k, name:DEV_NAME[k] || k };
     TARGETS.push({ key:k, name:DEV_NAME[k] || k, group:'Bench 3 — netwerk' });
     clickables.push(DEV[k].mesh);
   });
 
-  /* ---------- bovenste plank: zes werkplekken ---------- */
+  /* ---------- bovenste plank: zes workstations ---------- */
   var UY = 62;                                            // hoogte van het bovenste plankdek
   slab(178, 2.6, 60, 0, UY - 1.3, -5, deckM);
   slab(184, 11, 4.5, 0, UY - 8, 27, beam);
@@ -955,7 +956,7 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     chin.position.set(0, 12.9, -0.6); G.add(chin);
     monitorPicks.push(panel, screen);
     var wsKey = 'ws' + (idx + 1);
-    TARGETS.push({ key:wsKey, name:name, group:'Bench 3 — werkplekken' });
+    TARGETS.push({ key:wsKey, name:name, group:'Bench 3 — workstations' });
     [panel, screen].forEach(function (m) {
       m.userData.man = { key:wsKey, name:name }; clickables.push(m);
     });
@@ -1170,7 +1171,7 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
 
     // iMac
     prop(12, B5 - 46, UY, 12, 'iMac',
-         'iMac op Bench 5, bovenste plank. Ernaast staat de Mac mini met zijn eigen scherm.', 46,
+         'iMac on Bench 5, top shelf. The Mac mini with its own screen stands beside it.', 46,
       function (part, plane) {
         part(21, 1.1, 15, 0, 0.55, 6, alu);                       // voet
         part(3.6, 14, 8.5, 0, 7.5, 1, alu);                       // blad
@@ -1181,7 +1182,7 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
 
     // Mac mini met eigen monitor
     prop(13, B5 + 46, UY, 12, 'Mac mini + monitor',
-         'De Mac mini staat naast het scherm en is daarop aangesloten. Bench 5, bovenste plank.', 44,
+         'The Mac mini sits next to the screen and is connected to it. Bench 5, top shelf.', 44,
       function (part, plane, G) {
         part(24, 1.6, 15, 0, 0.8, -5, dark);                      // monitorvoet
         part(7, 15, 4.5, 0, 8.3, -5.2, dark);                     // hals
@@ -1202,7 +1203,7 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     // drie HP printers
     [0, 1, 2].forEach(function (i) {
       prop(14 + i, B5 - 58 + i * 42, 0, -6, 'HP printer ' + (i + 1),
-           'HP printer ' + (i + 1) + ' op Bench 5, middelste plank.', 40,
+           'HP printer ' + (i + 1) + ' on Bench 5, middle shelf.', 40,
         function (part, plane) {
           part(38, 26, 40, 0, 13, 0, hp);                         // romp
           part(30, 2.4, 26, 0, 26.6, 2, hpDark);                  // uitvoerbak
@@ -1215,7 +1216,7 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
 
     // Zebra ZT411 labelprinter
     prop(17, B5 + 68, 0, -4, 'Zebra ZT411',
-         'Zebra ZT411 labelprinter op Bench 5, middelste plank, naast de drie HP printers.', 44,
+         'Zebra ZT411 label printer on Bench 5, middle shelf, next to the three HP printers.', 44,
       function (part, plane) {
         part(28, 34, 46, 0, 17, 0, zeb);
         part(1.8, 27, 35, 14.4, 18, -2, zebDoor);                 // mediadeur opzij
@@ -1730,14 +1731,14 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     var on = m === 'walk';
     guy.visible = on;
     if (!on) { focusHint.hidden = true; promptEl.hidden = true; W.fp = false; }
-    document.getElementById('walkBtn').textContent = on ? 'Overzicht' : 'Rondlopen';
+    document.getElementById('walkBtn').textContent = on ? 'Overzicht' : 'Walk';
     document.getElementById('reset').hidden = on;
     document.getElementById('prevBench').hidden = on;
     document.getElementById('nextBench').hidden = on;
     document.getElementById('benchName').hidden = on;
     document.getElementById('hint').innerHTML = on
-      ? 'WASD = lopen · E = manual · spatie = springen · shift = rennen · F = eerste persoon'
-      : 'sleep = draaien · scroll = zoomen · <b>klik op een apparaat voor de manual</b>';
+      ? 'WASD = walk · E = manual · space = jump · shift = run · F = first person'
+      : 'drag = orbit · scroll = zoom · <b>click a device for its manual</b>';
     calloutObjs.forEach(function (o) { o.visible = !on; });
     camera.fov = on ? 58 : 33; camera.updateProjectionMatrix();
     if (on) {
@@ -1831,7 +1832,7 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     if (SND.master) SND.master.gain.setTargetAtTime(on ? 0.9 : 0.0001,
       SND.ctx ? SND.ctx.currentTime : 0, 0.15);
     var b = document.getElementById('soundBtn');
-    b.textContent = on ? 'Geluid uit' : 'Geluid aan';
+    b.textContent = on ? 'Sound off' : 'Sound on';
     b.setAttribute('aria-pressed', String(on));
   }
   document.getElementById('soundBtn').addEventListener('click', function () { setSound(!SND.on); });
@@ -1906,14 +1907,14 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
   function fpHint() {
     var h = document.getElementById('hint');
     if (!W.fp) {
-      h.innerHTML = 'WASD = lopen · E = manual · F = eerste persoon · spatie = springen · shift = rennen';
+      h.innerHTML = 'WASD = walk · E = manual · F = first person · space = jump · shift = run';
       return;
     }
     h.innerHTML = locked()
-      ? 'WASD = lopen · E = manual · muis = kijken · Esc = muis vrijgeven · F = terug'
+      ? 'WASD = walk · E = manual · mouse = look · Esc = release mouse · F = back'
       : (lockBlocked
-        ? 'WASD = lopen · E = manual · <b>sleep om te kijken</b> — muisvergrendeling is hier niet toegestaan'
-        : 'WASD = lopen · E = manual · <b>klik om de muis te vangen</b> · F = terug');
+        ? 'WASD = walk · E = manual · <b>drag to look</b> — pointer lock is not allowed here'
+        : 'WASD = walk · E = manual · <b>click to capture the mouse</b> · F = back');
   }
   function toggleFirstPerson() {
     W.fp = !W.fp;
@@ -1993,8 +1994,8 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     if (!QUIZ.on) { el.hidden = true; return; }
     el.hidden = false;
     if (QUIZ.i >= QUIZ.list.length) {
-      el.innerHTML = '<div class="qDone"><b>Klaar.</b> ' + QUIZ.list.length + ' kabels geprikt, ' +
-        (QUIZ.wrong === 0 ? 'zonder één fout.' : QUIZ.wrong + ' misprik' + (QUIZ.wrong > 1 ? 'ken' : '') + '.') +
+      el.innerHTML = '<div class="qDone"><b>Done.</b> ' + QUIZ.list.length + ' cables patched, ' +
+        (QUIZ.wrong === 0 ? 'without a single mistake.' : QUIZ.wrong + ' misprik' + (QUIZ.wrong > 1 ? 'ken' : '') + '.') +
         '</div><button type="button" class="mmBtn" id="quizAgain">Opnieuw</button>' +
         '<button type="button" class="mmBtn" id="quizStop">Stoppen</button>';
       document.getElementById('quizAgain').onclick = function () { quizStart(); };
@@ -2004,7 +2005,7 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     var t = QUIZ.list[QUIZ.i];
     el.innerHTML = '<div class="qN">' + (QUIZ.i + 1) + '/' + QUIZ.list.length + '</div>' +
       '<div class="qT">' + t.label + '</div>' +
-      '<div class="qHint" id="quizHint">Klik de twee bolletjes waar deze kabel in gaat.</div>' +
+      '<div class="qHint" id="quizHint">Click the two dots this cable plugs into.</div>' +
       '<button type="button" class="mmBtn" id="quizStop">Stoppen</button>';
     document.getElementById('quizStop').onclick = function () { quizStop(); };
   }
@@ -2020,13 +2021,13 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     if (!mesh.userData.correct) {
       QUIZ.wrong++;
       burst(150, 1.2, 0.24, 0.22, 'lowpass');
-      quizSay('Dat is een andere poort. ' + t.label, true);
+      quizSay('That is a different port. ' + t.label, true);
       return;
     }
     if (!QUIZ.picked) {
       QUIZ.picked = mesh.userData.end;
       blip(520, 700, 0.12, 0.1);
-      quizSay('Goed. Nu de andere kant.', false);
+      quizSay('Good. Now the other end.', false);
       markState();
       return;
     }
@@ -2052,13 +2053,13 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
         (m.userData.boots || []).forEach(function (b) { b.visible = false; });
       });
     });
-    document.getElementById('quizBtn').textContent = 'Stop oefenen';
+    document.getElementById('quizBtn').textContent = 'Stop practising';
     document.getElementById('hint').hidden = true;
     markState(); quizPaint(); dirty = true;
   }
   function quizStop() {
     QUIZ.on = false; markGroup.visible = false;
-    document.getElementById('quizBtn').textContent = 'Oefenen';
+    document.getElementById('quizBtn').textContent = 'Practise';
     document.getElementById('hint').hidden = false;
     quizPaint(); pushState(); dirty = true;
   }
@@ -2083,18 +2084,18 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
       var fig = document.createElement('figure');
       fig.className = 'mPage';
       fig.style.setProperty('--i', i);
-      fig.innerHTML = '<div class="mLoading">Pagina ' + (i + 1) + ' laden…</div>' +
+      fig.innerHTML = '<div class="mLoading">Loading page ' + (i + 1) + '…</div>' +
                       '<div class="mPageNo">' + (i + 1) + ' / ' + d.pages.length + '</div>';
       mBody.appendChild(fig);
       var img = new Image();
-      img.alt = 'Pagina ' + (i + 1);
+      img.alt = 'Page ' + (i + 1);
       img.onload = function () {
         var ph = fig.querySelector('.mLoading');
         if (ph) ph.replaceWith(img); else fig.insertBefore(img, fig.firstChild);
       };
       img.onerror = function () {
         var ph = fig.querySelector('.mLoading');
-        if (ph) ph.textContent = 'Pagina ' + (i + 1) + ' kon niet geladen worden.';
+        if (ph) ph.textContent = 'Page ' + (i + 1) + ' could not be loaded.';
       };
       img.src = 'data/pages/' + pid + '.' + (PAGE_EXT[pid] || 'jpg');
     });
@@ -2103,11 +2104,11 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     sheetEl.classList.remove('pdf');
     mTitle.textContent = d.title || 'Manual';
     mMeta.textContent = [d.brand, d.version ? 'v' + d.version : '',
-                         (d.steps || []).length + ' stappen'].filter(Boolean).join('   ·   ');
+                         (d.steps || []).length + ' steps'].filter(Boolean).join('   ·   ');
     document.getElementById('mFootL').textContent = d.brand || 'KOEL Retail';
     if (d.kind === 'pdf' && (d.pages || []).length) {
       mMeta.textContent = [d.brand, d.version ? 'v' + d.version : '',
-                           d.pages.length + " pagina's"].filter(Boolean).join('   ·   ');
+                           d.pages.length + " pages"].filter(Boolean).join('   ·   ');
       renderPages(d);
       return;
     }
@@ -2133,10 +2134,10 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     if (!openKey || manualEl.hidden) return;
     var d = MANUALS[LINKS[openKey]];
     if (d) { renderManual(d); return; }
-    mTitle.textContent = 'Nog geen manual';
+    mTitle.textContent = 'No manual yet';
     mMeta.textContent = '';
     document.getElementById('mFootL').textContent = 'KOEL Retail';
-    mBody.innerHTML = '<p class="mEmpty">Aan dit apparaat hangt nog geen manual. Schrijf er een in <b>Manuals</b> onder de tekening en koppel hem hier aan — dan staat hij er meteen in, ook voor je collega\'s.</p>';
+    mBody.innerHTML = '<p class="mEmpty">This device has no manual yet. Write one in <b>Manuals</b> below the drawing and attach it here — then it is there straight away, for your colleagues too\'s.</p>';
   }
   onData(paintSheet);
   function closeManual() {
@@ -2238,14 +2239,14 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     statusEl.textContent = s.hot ? cableLabel(s.hot)
       : (s.pc !== null && s.pc !== undefined) ?
         PCS[s.pc].msg
-      : s.failing ? 'D01 uit — X01-1 verliest zijn trunk en zijn POLR-pad, en het bypass-paar is verbroken. Via de stack blijft hij bij D02, maar INET1 is weg.'
-      : s.filter === 'all' ? 'Wijs een kabel aan in het model of in de lijst hieronder.'
-      : ({ wan:'De twee internetlijnen: INET1 op D01 poort 3, INET2 op D02 poort 3.',
-           plr:'POLR: 5G/LTE binnen op X01-1 poort 4, en vanaf poort 5 van elke switch naar poort 2 van de ION.',
-           ha:'Het bypass-paar tussen D01 en D02: poort 1 naar 4 en poort 4 naar 1, gekruist.',
-           lan:'De trunks van poort 1 van elke switch naar poort 5 van zijn ION, plus de stack tussen de switches.',
-           ap:'De dertig Cisco 9120 access points op de middelste plank van Bench 4, per twee gestapeld: X01-1 poort 11-20, X01-2 poort 11-20 en de derde Cisco poort 5-20.',
-           con:'De grijze console-kabels: van de WTI achterlangs naar de console-poort van elke switch.' })[s.filter];
+      : s.failing ? 'D01 uit — X01-1 verliest zijn trunk en zijn POLR-pad, en het bypass pair is verbroken. Via de stack blijft hij bij D02, maar INET1 is weg.'
+      : s.filter === 'all' ? 'Point at a cable in the model or in the list below.'
+      : ({ wan:'The two internet lines: INET1 on D01 port 3, INET2 on D02 port 3.',
+           plr:'POLR: 5G/LTE in on X01-1 port 4, and from port 5 of each switch to port 2 of the ION.',
+           ha:'The bypass pair between D01 and D02: port 1 to 4 and port 4 to 1, crossed over.',
+           lan:'The trunks from port 1 of each switch to port 5 of its ION, plus the stack between the switches.',
+           ap:'The thirty Cisco 9120 access points on the middle shelf of Bench 4, stacked in pairs: X01-1 ports 11-20, X01-2 ports 11-20 and the third Cisco ports 5-20.',
+           con:'The grey console cables: from the WTI round the back to the console port of each switch.' })[s.filter];
     statusEl.classList.toggle('warn', s.failing);
     dirty = true;
   });
@@ -2337,7 +2338,7 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     }
   }
   F += e('rect', { x:fx + 184, y:fy + 12, width:52, height:68, rx:3, fill:'none',
-                   style:'stroke:#D0453A;stroke-width:2' });      // bypass-paar
+                   style:'stroke:#D0453A;stroke-width:2' });      // bypass pair
   F += e('circle', { cx:fx + 448, cy:fy + 46, r:11, fill:'#4A4F54' }) +
        e('circle', { cx:fx + 476, cy:fy + 46, r:11, fill:'#4A4F54' });
   F += e('circle', { cx:fx + 502, cy:fy + 46, r:7, fill:K.port });
@@ -2376,7 +2377,7 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     }
   }
   G += r(fx + 520, fy + 20, 40, 52, K.swPanel, 3) + r(fx + 526, fy + 30, 28, 10, K.port, 2);
-  G += t(fx + 350, fy + fh + 28, 'kolom 1 = poort 1 en 2, kolom 2 = 3 en 4, enzovoort',
+  G += t(fx + 350, fy + fh + 28, 'column 1 = ports 1 and 2, column 2 = 3 and 4, and so on',
          { a:'middle', s:10.5, w:400, fill:'var(--ink-3)', f:"'Public Sans',sans-serif" });
   document.getElementById('faceSw').innerHTML = G;
 
@@ -2419,20 +2420,20 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
     listEl.innerHTML = all.map(function (id) {
       var m = MANUALS[id], n = linkedNames(id).length;
       return '<li><button type="button" data-id="' + id + '"' +
-             (cur === id ? ' aria-current="true"' : '') + '>' + esc(m.title || 'Zonder titel') +
-             '<small>' + ((m.steps || []).length) + ' stappen · ' +
-             (n ? n + ' apparaat' + (n > 1 ? 'en' : '') : 'nergens gekoppeld') + '</small></button></li>';
-    }).join('') || '<li><div class="mmNote">Nog geen manuals.</div></li>';
-    if (!writable) stateEl.textContent = 'Alleen-lezen in deze weergave — opslaan lukt niet.';
+             (cur === id ? ' aria-current="true"' : '') + '>' + esc(m.title || 'Untitled') +
+             '<small>' + ((m.steps || []).length) + ' steps · ' +
+             (n ? n + ' device' + (n > 1 ? 's' : '') : 'not attached') + '</small></button></li>';
+    }).join('') || '<li><div class="mmNote">No manuals yet.</div></li>';
+    if (!writable) stateEl.textContent = 'Read-only in this view — saving is disabled.';
     else stateEl.textContent = all.length + ' manual' + (all.length === 1 ? '' : 's') + ' in deze pagina.';
   }
 
   function paintSteps() {
     stepsEl.innerHTML = draft.steps.map(function (s, i) {
       return '<div class="mmStep" data-i="' + i + '"><div class="n">' + (i + 1) + '</div>' +
-        '<div class="f"><input type="text" class="sT" value="' + esc(s.title) + '" placeholder="Wat je doet">' +
+        '<div class="f"><input type="text" class="sT" value="' + esc(s.title) + '" placeholder="What you do">' +
         '<textarea class="sB" rows="2" placeholder="Toelichting (mag leeg)">' + esc(s.body) + '</textarea></div>' +
-        '<button type="button" class="mmX" title="Stap weg">&times;</button></div>';
+        '<button type="button" class="mmX" title="Remove step">&times;</button></div>';
     }).join('');
   }
   function paintLinks() {
@@ -2490,7 +2491,7 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
   function save() {
     collect();
     dbP.then(function (db) {
-      if (!db) { stateEl.textContent = 'Opslaan lukt niet in deze weergave.'; return; }
+      if (!db) { stateEl.textContent = 'Saving is disabled in this view.'; return; }
       var doc = { title:draft.title, brand:draft.brand, version:draft.version,
                   steps:draft.steps, updatedAt:Date.now() };
       var boxes = [].slice.call(linksEl.querySelectorAll('input[data-key]'));
@@ -2527,14 +2528,14 @@ function pushState() { listeners.forEach(function (f) { f(state); }); }
   $('mmPasteOk').addEventListener('click', function () {
     var raw;
     try { raw = JSON.parse($('mmJson').value); }
-    catch (e) { stateEl.textContent = 'Dat is geen geldige JSON.'; return; }
+    catch (e) { stateEl.textContent = 'That is not valid JSON.'; return; }
     var list = Array.isArray(raw) ? raw : [raw];
     dbP.then(function (db) {
-      if (!db) { stateEl.textContent = 'Importeren lukt niet in deze weergave.'; return; }
+      if (!db) { stateEl.textContent = 'Importing is disabled in this view.'; return; }
       return Promise.all(list.map(function (m) {
         var id = (typeof m.id === 'string' && /^[A-Za-z0-9_.~:@+-]{1,60}$/.test(m.id)) ? m.id : newId();
         return db.doc('manuals/' + id).set({
-          title:m.title || 'Zonder titel', brand:m.brand || '', version:m.version || '',
+          title:m.title || 'Untitled', brand:m.brand || '', version:m.version || '',
           steps:(m.steps || []).map(function (s) { return { title:s.title || '', body:s.body || '' }; }),
           updatedAt:Date.now()
         });
