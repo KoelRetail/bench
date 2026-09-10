@@ -1,0 +1,2576 @@
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KOEL Retail — Staging bench</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..700&family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --paper:#EEF1F4; --surface:#FFFFFF; --surface-2:#F7F9FB;
+    --ink:#151920; --ink-2:#565E6C; --ink-3:#828B99;
+    --rule:#D2D8E0; --rule-soft:#E3E7EC;
+    --accent:#2A54A4; --alarm:#C02F26;
+    --sky:#E4E9ED;
+    --shadow:0 1px 2px rgba(21,25,32,.06), 0 10px 30px -16px rgba(21,25,32,.26);
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --paper:#0E1116; --surface:#171B23; --surface-2:#1C212A;
+    --ink:#E9ECF2; --ink-2:#9AA3B3; --ink-3:#798394;
+    --rule:#2A313B; --rule-soft:#222831;
+    --accent:#86ABEE; --alarm:#FF7364;
+    --sky:#141920;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -16px rgba(0,0,0,.8);
+  } }
+  :root[data-theme="dark"] {
+    --paper:#0E1116; --surface:#171B23; --surface-2:#1C212A;
+    --ink:#E9ECF2; --ink-2:#9AA3B3; --ink-3:#798394;
+    --rule:#2A313B; --rule-soft:#222831;
+    --accent:#86ABEE; --alarm:#FF7364;
+    --sky:#141920;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 30px -16px rgba(0,0,0,.8);
+  }
+
+  body { background:var(--paper); color:var(--ink); font-size:15px; line-height:1.6; -webkit-font-smoothing:antialiased;
+         font-family:"Public Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width:1120px; margin:0 auto; padding:38px 20px 84px; display:flex; flex-direction:column; gap:42px; }
+  .display { font-family:"Archivo", ui-sans-serif, system-ui, sans-serif; font-stretch:118%; font-weight:700; letter-spacing:-.005em; text-wrap:balance; }
+  .eyebrow { font-family:"IBM Plex Mono", ui-monospace, monospace; font-size:11px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); }
+
+  header { display:flex; flex-direction:column; gap:12px; }
+  h1 { font-size:clamp(30px,5vw,44px); line-height:1.04; margin:0; }
+  .lede { color:var(--ink-2); max-width:64ch; margin:0; font-size:16px; }
+  .facts { display:flex; flex-wrap:wrap; gap:0 28px; padding-top:14px; border-top:1px solid var(--rule); }
+  .fact { display:flex; align-items:baseline; gap:8px; padding:6px 0; }
+  .fact b { font-family:"IBM Plex Mono",monospace; font-size:19px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .fact span { font-size:12.5px; color:var(--ink-3); }
+
+  section { display:flex; flex-direction:column; gap:16px; }
+  h2 { font-size:12.5px; margin:0; font-family:"IBM Plex Mono",monospace; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); }
+
+  /* ---- 3D-venster ---- */
+  #stage { position:relative; overscroll-behavior:contain; background:var(--sky); border:1px solid var(--rule); border-radius:12px;
+           box-shadow:var(--shadow); overflow:hidden; touch-action:none; cursor:grab; }
+  #stage.grabbing { cursor:grabbing; }
+  #stage.pick { cursor:pointer; }
+  #stage:focus { outline:none; }
+  #stage:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+  #stage canvas { display:block; width:100%; height:100%; }
+  #focusHint { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); z-index:3;
+               font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--surface);
+               background:rgba(20,24,30,.82); border-radius:8px; padding:9px 15px; pointer-events:none; }
+  #focusHint[hidden] { display:none; }
+  #hint[hidden] { display:none; }
+  #hint b { color:var(--ink-2); font-weight:600; }
+  #hint { position:absolute; left:12px; bottom:10px; font-family:"IBM Plex Mono",monospace; font-size:11px;
+          color:var(--ink-3); background:var(--surface); border:1px solid var(--rule); border-radius:6px;
+          padding:5px 9px; pointer-events:none; opacity:.94; }
+  #walkBtn { position:absolute; left:12px; top:12px; z-index:3; font-family:"IBM Plex Mono",monospace;
+             font-size:11.5px; color:var(--ink-2); background:var(--surface); border:1px solid var(--rule);
+             border-radius:6px; padding:6px 12px; cursor:pointer; }
+  #walkBtn:hover { color:var(--ink); }
+  #soundBtn { position:absolute; left:112px; top:12px; z-index:3; font-family:"IBM Plex Mono",monospace;
+              font-size:11.5px; color:var(--ink-2); background:var(--surface); border:1px solid var(--rule);
+              border-radius:6px; padding:6px 12px; cursor:pointer; }
+  #soundBtn:hover { color:var(--ink); }
+  #soundBtn[aria-pressed="true"] { background:var(--accent); border-color:var(--accent); color:var(--surface); }
+  #quizBtn { position:absolute; left:212px; top:12px; z-index:3; font-family:"IBM Plex Mono",monospace;
+             font-size:11.5px; color:var(--ink-2); background:var(--surface); border:1px solid var(--rule);
+             border-radius:6px; padding:6px 12px; cursor:pointer; }
+  #quizBtn:hover { color:var(--ink); }
+  #quizBar { position:absolute; left:50%; bottom:14px; transform:translateX(-50%); z-index:4;
+             display:flex; align-items:center; gap:14px; max-width:92%;
+             background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+             box-shadow:var(--shadow); padding:11px 14px; }
+  #quizBar[hidden] { display:none; }
+  .qN { font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600; color:var(--surface);
+        background:var(--accent); border-radius:6px; padding:5px 9px; white-space:nowrap; }
+  .qT { font-family:"IBM Plex Mono",monospace; font-size:12.5px; color:var(--ink); }
+  .qHint { font-size:12px; color:var(--ink-3); }
+  .qHint.bad { color:var(--alarm); } .qHint.good { color:#2E9E5B; }
+  .qDone { font-size:13.5px; color:var(--ink); }
+  #crosshair { position:absolute; left:50%; top:50%; z-index:3; width:18px; height:18px;
+               transform:translate(-50%,-50%); pointer-events:none; opacity:.85; }
+  #crosshair::before, #crosshair::after { content:''; position:absolute; background:#F6F8FA;
+    box-shadow:0 0 2px rgba(0,0,0,.75); }
+  #crosshair::before { left:50%; top:0; width:2px; height:100%; transform:translateX(-50%); }
+  #crosshair::after { top:50%; left:0; height:2px; width:100%; transform:translateY(-50%); }
+  #crosshair[hidden] { display:none; }
+  #usePrompt { position:absolute; z-index:3; transform:translate(-50%,-140%); pointer-events:auto; cursor:pointer;
+               font-family:"IBM Plex Mono",monospace; font-size:11.5px; white-space:nowrap;
+               color:#F6F8FA; background:rgba(18,22,28,.86); border-radius:7px; padding:6px 11px; }
+  #usePrompt b { display:inline-block; margin-right:7px; padding:1px 6px; border-radius:4px;
+                 background:#F6F8FA; color:#12161C; font-weight:700; }
+  #touchPad { position:absolute; left:18px; bottom:56px; z-index:3; width:112px; height:112px;
+              border-radius:50%; background:rgba(20,24,30,.22); border:1px solid rgba(255,255,255,.35);
+              touch-action:none; }
+  #touchPad i { position:absolute; left:50%; top:50%; width:46px; height:46px; border-radius:50%;
+                background:rgba(245,247,250,.85); transform:translate(-50%,-50%); }
+  #touchJump { position:absolute; right:18px; bottom:66px; z-index:3; width:72px; height:72px;
+               border-radius:50%; border:1px solid rgba(255,255,255,.35); background:rgba(20,24,30,.22);
+               color:#F6F8FA; font-size:22px; touch-action:none; cursor:pointer; }
+  #usePrompt[hidden], #touchPad[hidden], #touchJump[hidden] { display:none; }
+  #reset[hidden], #benchName[hidden], .navArrow[hidden] { display:none; }
+  #reset { position:absolute; right:12px; top:12px; font-family:"IBM Plex Mono",monospace; font-size:11.5px;
+           color:var(--ink-2); background:var(--surface); border:1px solid var(--rule); border-radius:6px;
+           padding:6px 11px; cursor:pointer; }
+  #reset:hover { color:var(--ink); }
+  .navArrow { position:absolute; top:50%; transform:translateY(-50%); z-index:3;
+              width:40px; height:40px; border-radius:50%; border:1px solid var(--rule);
+              background:var(--surface); color:var(--ink-2); font-size:22px; line-height:1;
+              display:flex; align-items:center; justify-content:center; padding:0 0 3px; cursor:pointer;
+              transition:color .15s, opacity .15s; }
+  .navArrow:hover:not(:disabled) { color:var(--ink); }
+  .navArrow:disabled { opacity:.3; cursor:default; }
+  .navArrow.left { left:14px; } .navArrow.right { right:14px; }
+  #benchName { position:absolute; top:14px; left:50%; transform:translateX(-50%); z-index:3;
+               font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; letter-spacing:.12em;
+               color:var(--ink); background:var(--surface); border:1px solid var(--rule);
+               border-radius:6px; padding:6px 13px; }
+  #manualWrap { position:absolute; inset:0; z-index:5; display:flex; align-items:center;
+                justify-content:center; perspective:1400px; }
+  #manualWrap[hidden] { display:none; }
+  #manualScrim { position:absolute; inset:0; background:rgba(12,14,18,.5); animation:scrimIn .22s ease both; }
+  @keyframes scrimIn { from { opacity:0 } to { opacity:1 } }
+
+  /* het vel papier zelf — blijft papier, ook in donkere modus */
+  #sheet { position:relative; width:min(470px,88%); max-height:86%; display:flex; flex-direction:column;
+           background:#FBF8F0; color:#1B1813; touch-action:pan-y;
+           border:1px solid rgba(0,0,0,.10);
+           box-shadow:0 34px 64px -22px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.18);
+           animation:sheetIn .5s cubic-bezier(.18,.86,.24,1) both; transform-origin:50% 90%; }
+  @keyframes sheetIn {
+    0%   { opacity:0; transform:translateY(52px) scale(.84) rotateX(20deg) rotate(-2.4deg); }
+    58%  { opacity:1; transform:translateY(-8px) scale(1.025) rotateX(-2.5deg) rotate(.7deg); }
+    100% { opacity:1; transform:translateY(0) scale(1) rotateX(0) rotate(-.5deg); }
+  }
+  #sheet::after { content:''; position:absolute; inset:0; pointer-events:none;   /* vezel + lichtval */
+    background:radial-gradient(120% 80% at 20% 0%, rgba(255,255,255,.7), rgba(0,0,0,0) 60%),
+               linear-gradient(180deg, rgba(0,0,0,0) 82%, rgba(120,105,80,.09) 100%); }
+  .holes { position:absolute; left:20px; top:0; bottom:0; width:14px;
+           display:flex; flex-direction:column; justify-content:space-evenly; align-items:center; }
+  .holes i { width:13px; height:13px; border-radius:50%; background:rgba(15,17,20,.45);
+             box-shadow:inset 0 1px 2px rgba(0,0,0,.55), 0 1px 0 rgba(255,255,255,.6); }
+  #mClose { position:absolute; top:8px; right:10px; z-index:2; border:0; background:transparent;
+            color:#8A8375; font-size:24px; line-height:1; cursor:pointer; padding:2px 4px; }
+  #mClose:hover { color:#1B1813; }
+
+  .sheetHead { flex:none; padding:20px 24px 12px 62px; border-bottom:1px solid rgba(0,0,0,.13); }
+  .mDev { font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.16em;
+          text-transform:uppercase; color:#9A7C3A; margin-bottom:5px; }
+  #mTitle { margin:0; font-family:"Archivo",sans-serif; font-stretch:112%; font-weight:700;
+            font-size:20px; line-height:1.18; color:#161310; }
+  .mMeta { margin-top:7px; font-family:"IBM Plex Mono",monospace; font-size:10.5px; color:#7E776A; }
+
+  .mBody { flex:1 1 auto; min-height:0; overflow-y:auto; overscroll-behavior:contain;
+           padding:16px 24px 20px 62px; position:relative; }
+  .mBody::before { content:''; position:absolute; left:50px; top:0; bottom:0;
+                   border-left:1px solid rgba(178,74,60,.30); }        /* kantlijn */
+  .mBody ol { list-style:none; margin:0; padding:0; counter-reset:st; display:flex; flex-direction:column; gap:16px; }
+  .mBody li { counter-increment:st; position:relative; padding-left:30px;
+              animation:stepIn .34s ease both; animation-delay:calc(var(--i,0) * 55ms + .16s); }
+  @keyframes stepIn { from { opacity:0; transform:translateY(9px) } to { opacity:1; transform:none } }
+  .mBody li::before { content:counter(st); position:absolute; left:0; top:1px; width:21px; height:21px;
+    border-radius:50%; background:#1B1813; color:#FBF8F0; font-family:"IBM Plex Mono",monospace;
+    font-size:11px; font-weight:600; display:flex; align-items:center; justify-content:center; }
+  .mBody h4 { margin:2px 0 4px; font-size:14px; font-weight:600; line-height:1.35; color:#161310; }
+  .mBody p { margin:0; font-size:13.5px; color:#4A443A; line-height:1.55; white-space:pre-wrap; }
+  #sheet.pdf { width:min(720px,94%); max-height:92%; }
+  #sheet.pdf .holes { display:none; }
+  #sheet.pdf .sheetHead, #sheet.pdf .mFoot { padding-left:24px; }
+  #sheet.pdf .mBody { padding:0; }
+  #sheet.pdf .mBody::before { display:none; }
+  .mPage { margin:0; position:relative; border-bottom:1px solid rgba(0,0,0,.10); background:#fff;
+           min-height:60px; animation:stepIn .3s ease both; }
+  .mPage img { display:block; width:100%; height:auto; }
+  .mPageNo { position:absolute; right:8px; bottom:6px; z-index:1;
+             font-family:"IBM Plex Mono",monospace; font-size:9.5px; letter-spacing:.1em;
+             color:#8A8375; background:rgba(255,255,255,.86); border-radius:4px; padding:2px 6px; }
+  .mLoading { padding:26px 24px; font-size:13px; color:#8A8375;
+              font-family:"IBM Plex Mono",monospace; }
+  .mEmpty { font-size:14px; color:#4A443A; line-height:1.6; animation:stepIn .34s ease both .16s; }
+  .mFoot { flex:none; display:flex; justify-content:space-between; gap:10px;
+           padding:10px 24px 12px 62px; border-top:1px solid rgba(0,0,0,.13);
+           font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.1em;
+           text-transform:uppercase; color:#8A8375; }
+  @media (prefers-reduced-motion:reduce) {
+    #sheet, #manualScrim, .mBody li, .mEmpty { animation:none !important; }
+    #sheet { transform:none; }
+  }
+  #fallback { display:none; padding:34px 22px; text-align:center; color:var(--ink-2); font-size:14px; }
+
+  .bar { display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px; }
+  .seg { display:inline-flex; border:1px solid var(--rule); border-radius:8px; overflow:hidden; background:var(--surface); }
+  .seg button { appearance:none; border:0; background:transparent; cursor:pointer; font-family:"IBM Plex Mono",monospace;
+                font-size:12px; font-weight:500; color:var(--ink-2); padding:8px 13px; border-right:1px solid var(--rule-soft);
+                transition:background .15s, color .15s; }
+  .seg button:last-child { border-right:0; }
+  .seg button:hover { background:var(--surface-2); color:var(--ink); }
+  .seg button[aria-pressed="true"] { background:var(--accent); color:var(--surface); }
+  .seg button:focus-visible { outline:2px solid var(--accent); outline-offset:-2px; }
+  .segLabel { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-3); font-family:"IBM Plex Mono",monospace; }
+  .toggle { display:inline-flex; align-items:center; gap:8px; font-size:13px; color:var(--ink-2); cursor:pointer; user-select:none; }
+  .toggle input { accent-color:var(--accent); width:15px; height:15px; }
+
+  .status { font-family:"IBM Plex Mono",monospace; font-size:12.5px; color:var(--ink-2);
+            border-left:2px solid var(--accent); padding:6px 0 6px 12px; min-height:24px; }
+  .status.warn { border-left-color:var(--alarm); color:var(--ink); }
+
+  .legend { display:flex; flex-wrap:wrap; gap:10px 22px; }
+  .key { display:flex; align-items:center; gap:9px; font-size:13px; color:var(--ink-2); }
+  .key i { width:26px; height:5px; border-radius:3px; flex:none; }
+  .key b { color:var(--ink); font-weight:600; }
+  figcaption { color:var(--ink-2); font-size:13.5px; max-width:74ch; }
+
+  .keys { list-style:none; margin:0; padding:0; counter-reset:k;
+          display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:8px 26px; }
+  .keys li { counter-increment:k; position:relative; padding-left:32px; font-size:13.5px; color:var(--ink-2); line-height:1.45; }
+  .keys li::before { content:counter(k); position:absolute; left:0; top:1px; width:21px; height:21px; border-radius:50%;
+    border:1.5px solid var(--ink); color:var(--ink); font-family:"IBM Plex Mono",monospace; font-size:11.5px; font-weight:600;
+    display:flex; align-items:center; justify-content:center; }
+  .keys b { color:var(--ink); font-weight:600; }
+
+  .faces { display:grid; grid-template-columns:repeat(auto-fit,minmax(430px,1fr)); gap:16px; }
+  .face { background:var(--surface); border:1px solid var(--rule); border-radius:12px; box-shadow:var(--shadow); padding:6px 8px 10px; overflow-x:auto; }
+  .face h3 { margin:8px 10px 0; font-size:13px; font-family:"IBM Plex Mono",monospace; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); }
+  .face svg { display:block; width:100%; height:auto; min-width:420px; }
+  .pm { transition:opacity .25s ease; }
+  .pm.dim { opacity:.15; }
+
+  .sched { border:1px solid var(--rule); border-radius:10px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow); }
+  .scroll { overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; min-width:660px; }
+  th,td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--rule-soft); }
+  thead th { font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; letter-spacing:.11em; text-transform:uppercase;
+             color:var(--ink-3); background:var(--surface-2); border-bottom:1px solid var(--rule); white-space:nowrap; }
+  tbody tr { transition:background .15s; cursor:default; }
+  tbody tr:hover, tbody tr:focus-within { background:var(--surface-2); }
+  tbody tr:last-child td { border-bottom:0; }
+  tbody tr.grp td { border-top:1px solid var(--rule); }
+  td.n { font-family:"IBM Plex Mono",monospace; color:var(--ink-3); width:1%; font-variant-numeric:tabular-nums; }
+  td.dev2 { font-weight:500; white-space:nowrap; }
+  td.port { font-family:"IBM Plex Mono",monospace; font-variant-numeric:tabular-nums; width:1%; white-space:nowrap; }
+  td.role { white-space:nowrap; font-size:13.5px; color:var(--ink-2); }
+  .swatch { display:inline-block; width:22px; height:6px; border-radius:3px; vertical-align:middle; border:1px solid rgba(0,0,0,.22); }
+
+  .checks { display:flex; flex-direction:column; }
+  .check { display:grid; grid-template-columns:34px 1fr; gap:0 16px; padding:18px 0; border-top:1px solid var(--rule); }
+  .check:last-child { border-bottom:1px solid var(--rule); }
+  .check .idx { font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600; color:var(--accent); padding-top:3px; }
+  .check h3 { margin:0 0 4px; font-size:16px; font-family:"Archivo",sans-serif; font-stretch:112%; font-weight:600; }
+  .check p { margin:0; color:var(--ink-2); font-size:14.5px; max-width:68ch; }
+  code { font-family:"IBM Plex Mono",monospace; font-size:.92em; color:var(--ink); background:var(--surface-2);
+         border:1px solid var(--rule-soft); border-radius:3px; padding:0 4px; }
+  .mmGrid { display:grid; grid-template-columns:minmax(230px,300px) 1fr; gap:16px; align-items:start; }
+  @media (max-width:760px) { .mmGrid { grid-template-columns:1fr; } }
+  .mmCol { background:var(--surface); border:1px solid var(--rule); border-radius:10px;
+           box-shadow:var(--shadow); padding:12px; }
+  .mmBar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+  .mmBarEnd { justify-content:flex-end; margin-top:14px; }
+  .mmBtn { appearance:none; border:1px solid var(--rule); background:var(--surface); color:var(--ink-2);
+           font-family:"IBM Plex Mono",monospace; font-size:11.5px; border-radius:7px;
+           padding:6px 11px; cursor:pointer; }
+  .mmBtn:hover { color:var(--ink); background:var(--surface-2); }
+  .mmPrimary { background:var(--accent); border-color:var(--accent); color:var(--surface); }
+  .mmDanger { color:var(--alarm); border-color:var(--rule); }
+  .mmList { list-style:none; margin:10px 0 0; padding:0; display:flex; flex-direction:column; gap:2px; }
+  .mmList li { border-radius:7px; }
+  .mmList button { width:100%; text-align:left; border:0; background:transparent; cursor:pointer;
+                   padding:8px 10px; border-radius:7px; color:var(--ink); font:inherit; font-size:13.5px; }
+  .mmList button:hover { background:var(--surface-2); }
+  .mmList button[aria-current="true"] { background:var(--surface-2); box-shadow:inset 2px 0 0 var(--accent); }
+  .mmList small { display:block; color:var(--ink-3); font-family:"IBM Plex Mono",monospace; font-size:10.5px; margin-top:2px; }
+  .mmNote { color:var(--ink-3); font-size:12.5px; line-height:1.5; padding:6px 2px; }
+  .mmSub { font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.12em;
+           text-transform:uppercase; color:var(--ink-3); margin:16px 0 8px; }
+  .mmRow { display:flex; gap:10px; }
+  .mmRow2 { margin-top:10px; }
+  .mmRow label { flex:1; display:flex; flex-direction:column; gap:4px;
+                 font-family:"IBM Plex Mono",monospace; font-size:10.5px; letter-spacing:.1em;
+                 text-transform:uppercase; color:var(--ink-3); }
+  #manualsSection input, #manualsSection textarea {
+    font:inherit; font-size:13.5px; color:var(--ink); background:var(--surface-2);
+    border:1px solid var(--rule); border-radius:7px; padding:7px 9px; width:100%; }
+  #manualsSection textarea { font-family:"IBM Plex Mono",monospace; font-size:12px; resize:vertical; }
+  #manualsSection input:focus, #manualsSection textarea:focus { outline:2px solid var(--accent); outline-offset:-1px; }
+  .mmStep { display:grid; grid-template-columns:24px 1fr auto; gap:8px; align-items:start; margin-bottom:8px; }
+  .mmStep .n { font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--ink-3); padding-top:9px; }
+  .mmStep .f { display:flex; flex-direction:column; gap:5px; }
+  .mmX { border:0; background:transparent; color:var(--ink-3); cursor:pointer; font-size:16px; padding:6px 4px; }
+  .mmX:hover { color:var(--alarm); }
+  .mmLinks { display:flex; flex-wrap:wrap; gap:6px; }
+  .mmLinks label { display:inline-flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-2);
+                   border:1px solid var(--rule); border-radius:999px; padding:5px 11px; cursor:pointer; }
+  .mmLinks input { width:14px; height:14px; accent-color:var(--accent); }
+  footer { color:var(--ink-3); font-size:12.5px; border-top:1px solid var(--rule); padding-top:16px; }
+</style>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">KOEL Retail · Staging &amp; Logistics</div>
+    <h1 class="display">Palo Alto patchschema</h1>
+    <p class="lede">De bench als 3D-model dat je kunt ronddraaien. Sleep om eromheen te lopen, scroll om in te zoomen op een poort. Bijgewerkt naar de nieuwe standaard: twee Prisma SDWAN ION 1200-S routers onder twee gestackte Cisco C9200's, met de POLR-5G nu op de switch in plaats van op de router.</p>
+    <div class="facts">
+      <div class="fact"><b>10</b><span>patchkabels</span></div>
+      <div class="fact"><b>2</b><span>ION 1200-S</span></div>
+      <div class="fact"><b>3</b><span>console-kabels</span></div>
+      <div class="fact"><b>3</b><span>switches</span></div>
+      <div class="fact"><b>1</b><span>console server</span></div>
+      <div class="fact"><b>6</b><span>werkplekken</span></div>
+      <div class="fact"><b>6</b><span>registers</span></div>
+      <div class="fact"><b>30</b><span>access points</span></div>
+    </div>
+  </header>
+
+  <section>
+    <h2>De bench</h2>
+    <div class="bar">
+      <span class="segLabel">Toon</span>
+      <div class="seg" role="group" aria-label="Filter kabels">
+        <button type="button" data-filter="all" aria-pressed="true">Alles</button>
+        <button type="button" data-filter="wan" aria-pressed="false">INET</button>
+        <button type="button" data-filter="plr" aria-pressed="false">POLR</button>
+        <button type="button" data-filter="ha" aria-pressed="false">Bypass</button>
+        <button type="button" data-filter="lan" aria-pressed="false">Trunk</button>
+        <button type="button" data-filter="ap" aria-pressed="false">AP's</button>
+        <button type="button" data-filter="con" aria-pressed="false">Console</button>
+      </div>
+      <label class="toggle"><input type="checkbox" id="fail"> Wat als D01 uitvalt?</label>
+    </div>
+
+    <figure style="margin:0;display:flex;flex-direction:column;gap:14px">
+      <div id="stage" tabindex="0">
+        <button type="button" id="reset">Reset weergave</button>
+        <div id="benchName">BENCH 3</div>
+        <button type="button" id="walkBtn">Rondlopen</button>
+        <button type="button" id="soundBtn" aria-pressed="false">Geluid aan</button>
+        <button type="button" id="quizBtn">Oefenen</button>
+        <div id="quizBar" hidden></div>
+        <div id="crosshair" hidden></div>
+        <div id="usePrompt" hidden></div>
+        <div id="touchPad" hidden><i></i></div>
+        <button type="button" id="touchJump" hidden aria-label="Springen">&#9650;</button>
+        <button type="button" class="navArrow left" id="prevBench" aria-label="Vorige bench">&lsaquo;</button>
+        <button type="button" class="navArrow right" id="nextBench" aria-label="Volgende bench">&rsaquo;</button>
+        <div id="focusHint" hidden>Klik in het venster om te lopen</div>
+        <div id="hint">sleep = draaien · scroll = zoomen · <b>klik op een apparaat voor de manual</b></div>
+        <div id="manualWrap" hidden>
+          <div id="manualScrim"></div>
+          <article id="sheet" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+            <div class="holes"><i></i><i></i><i></i></div>
+            <button type="button" id="mClose" aria-label="Sluiten (X)" title="Sluiten — X of Esc">&times;</button>
+            <header class="sheetHead">
+              <div class="mDev" id="mDev"></div>
+              <h3 id="mTitle"></h3>
+              <div class="mMeta" id="mMeta"></div>
+            </header>
+            <div class="mBody" id="mBody"></div>
+            <footer class="mFoot"><span id="mFootL">KOEL Retail</span><span>Manual Maker</span></footer>
+          </article>
+        </div>
+        <div id="fallback">De 3D-weergave kon niet laden. De kabellijst en de poortdetails hieronder werken gewoon.</div>
+      </div>
+
+      <p class="status" id="status">Wijs een kabel aan in het model of in de lijst hieronder.</p>
+
+      <div class="legend">
+        <div class="key"><i style="background:#E9C21B"></i><span><b>Geel = INET</b> — internetlijn op poort 3 van elke ION</span></div>
+        <div class="key"><i style="background:#9B5FD0"></i><span><b>Paars = POLR</b> — 5G/LTE via de switch naar poort 2</span></div>
+        <div class="key"><i style="background:#D3372C"></i><span><b>Rood = bypass-paar</b> — D01 naar D02, gekruist</span></div>
+        <div class="key"><i style="background:#4FB0E5"></i><span><b>Blauw = trunk</b> — switch poort 1 naar ION poort 5</span></div>
+        <div class="key"><i style="background:#1E4E8C"></i><span><b>Donkerblauw = stack</b> — tussen de switches, achterlangs</span></div>
+        <div class="key"><i style="background:#17A2A2"></i><span><b>Turquoise = access points</b> — 30 stuks op Bench 4 naar de switches</span></div>
+        <div class="key"><i style="background:#737B85"></i><span><b>Grijs = console</b> — WTI naar de achterkant van de switches</span></div>
+        <div class="key"><i style="background:#4FA85F"></i><span><b>Groen = werkplek</b> — netwerkkabel van elke M90q</span></div>
+      </div>
+
+      <ol class="keys">
+        <li><b>INET-invoer</b> — hier komen INET1 en INET2 binnen, elk naar poort 3 van zijn ION</li>
+        <li><b>Cradlepoint</b> — de POLR 5G/LTE. Gaat nu naar poort 4 van X01-1, niet meer naar de router</li>
+        <li><b>D01</b> — Palo Alto Prisma SDWAN ION 1200-S, EDGE Router-1 (aanname: de bovenste)</li>
+        <li><b>D02</b> — Palo Alto Prisma SDWAN ION 1200-S, EDGE Router-2</li>
+        <li><b>WTI console server</b> — out-of-band beheer; drie console-kabels achterlangs naar de switches</li>
+        <li><b>X01-1</b> — EDGE site MDF Switch-1 (Cisco C9200)</li>
+        <li><b>X01-2</b> — EDGE site MDF Switch-2 (Cisco C9200), gestackt met X01-1</li>
+        <li><b>Derde Cisco</b> — staat niet in de nieuwe tekening, wel aan de console server en aan de access points</li>
+      </ol>
+
+      <figcaption><b>De bovenste plank:</b> drie Lenovo-monitors aan de voorkant en drie aan de achterkant. Achter elk scherm hangt een Lenovo M90q in een VESA-beugel. Ga er met je muis overheen en de pc schuift eruit en komt plat op de plank te liggen — met de groene netwerkkabel en de oranje USB image-stick er nog in. Zo zie je meteen waar hij in moet en hoe hij eruit komt. Op <b>Bench 4</b> staan zes Toshiba all-in-one kassa's, ook drie voor en drie achter — ga daar met je muis overheen en het scherm kantelt op zijn scharnier. Op de plank eronder liggen de dertig access points, per twee gestapeld. <b>Bench 5</b> heeft boven de iMac en de Mac mini met zijn eigen scherm, en op de plank eronder drie HP printers plus de Zebra ZT411. Wijs ze aan voor hun naam.</figcaption>
+
+      <figcaption>De kleuren zijn de afspraak, niet wat er nu op de bench hangt. Bij het herbouwen naar deze standaard is dit de kleurcode om aan te houden.</figcaption>
+    </figure>
+  </section>
+
+  <section id="manualsSection" hidden>
+    <h2>Manuals</h2>
+    <p class="lede" style="font-size:14.5px">Wat je hier schrijft staat in de opslag van deze pagina zelf. Klik je in het model op het apparaat waar hij aan hangt, dan komt precies deze tekst als blad tevoorschijn — bij iedereen die de link opent.</p>
+    <div class="mmGrid">
+      <div class="mmCol">
+        <div class="mmBar">
+          <span class="segLabel">Manuals</span>
+          <button type="button" class="mmBtn" id="mmNew">+ Nieuw</button>
+          <button type="button" class="mmBtn" id="mmImport">Importeren</button>
+        </div>
+        <ul class="mmList" id="mmList"></ul>
+        <div class="mmNote" id="mmState"></div>
+      </div>
+      <div class="mmCol">
+        <div id="mmEditor" hidden>
+          <div class="mmRow">
+            <label>Titel<input type="text" id="mmTitle" placeholder="Staging PC NIKE"></label>
+          </div>
+          <div class="mmRow mmRow2">
+            <label>Merk<input type="text" id="mmBrand" placeholder="KOEL Retail"></label>
+            <label>Versie<input type="text" id="mmVersion" placeholder="1.0"></label>
+          </div>
+          <div class="mmSub">Stappen</div>
+          <div id="mmSteps"></div>
+          <button type="button" class="mmBtn" id="mmAddStep">+ Stap</button>
+          <div class="mmSub">Hangt aan</div>
+          <div class="mmLinks" id="mmLinks"></div>
+          <div class="mmBar mmBarEnd">
+            <button type="button" class="mmBtn mmDanger" id="mmDelete">Verwijderen</button>
+            <button type="button" class="mmBtn mmPrimary" id="mmSave">Opslaan</button>
+          </div>
+        </div>
+        <div id="mmEmpty" class="mmNote">Kies links een manual, of maak een nieuwe.</div>
+        <div id="mmPaste" hidden>
+          <div class="mmSub">Plak de JSON uit Manual Maker</div>
+          <textarea id="mmJson" rows="9" placeholder='{"title":"...","steps":[{"title":"...","body":"..."}]}'></textarea>
+          <div class="mmBar mmBarEnd">
+            <button type="button" class="mmBtn" id="mmPasteCancel">Annuleren</button>
+            <button type="button" class="mmBtn mmPrimary" id="mmPasteOk">Toevoegen</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Welke poort precies</h2>
+    <div class="faces">
+      <div class="face"><h3>ION 1200-S — voorkant</h3><svg id="facePa" viewBox="0 0 640 230" role="img" aria-label="Voorkant van een Palo Alto Prisma SDWAN ION 1200-S met tien netwerkpoorten in vijf kolommen van twee. Poort 1 en 4 vormen het bypass-paar naar de andere ION, poort 2 krijgt de POLR van de switch, poort 3 de internetlijn en poort 5 de trunk van de switch."></svg></div>
+      <div class="face"><h3>Cisco C9200 — voorkant</h3><svg id="faceSw" viewBox="0 0 640 230" role="img" aria-label="Voorkant van een Cisco C9200 met 48 poorten in twee rijen. Poort 1 gaat als trunk naar poort 5 van de ION, poort 4 is de POLR-invoer van de 5G-router en poort 5 gaat als POLR naar poort 2 van de ION."></svg></div>
+    </div>
+    <figcaption><b>Zo lees je de nummers:</b> op allebei staan de poorten per kolom onder elkaar — kolom 1 is poort 1 (boven) en 2 (onder), kolom 2 is 3 en 4, enzovoort. Dat komt overeen met de faceplate-foto van de ION 1200-S. Het rode kader zit om poort 3 en 4 — zo staat het op het apparaat zelf gedrukt. De kabels in dit model lopen echter via poort 1 en 4, want dat is wat de lijnen in de tekening doen; zie punt 03 hieronder.</figcaption>
+  </section>
+
+  <section>
+    <h2>Kabellijst</h2>
+    <div class="sched">
+      <div class="scroll">
+        <table id="sched">
+          <thead><tr><th>#</th><th>Kant A</th><th>Poort</th><th>Kant B</th><th>Poort</th><th>Functie</th><th>Kabel</th></tr></thead>
+          <tbody>
+            <tr data-cable="w1" tabindex="0"><td class="n">1</td><td class="dev2">Palo Alto ION D01</td><td class="port">3</td><td class="dev2">INET1 (internetlijn)</td><td class="port">—</td><td class="role">internet</td><td><span class="swatch" style="background:#E9C21B"></span></td></tr>
+            <tr data-cable="w2" tabindex="0"><td class="n">2</td><td class="dev2">Palo Alto ION D02</td><td class="port">3</td><td class="dev2">INET2 (internetlijn)</td><td class="port">—</td><td class="role">internet</td><td><span class="swatch" style="background:#E9C21B"></span></td></tr>
+            <tr data-cable="p0" tabindex="0" class="grp"><td class="n">3</td><td class="dev2">POLR 5G/LTE</td><td class="port">—</td><td class="dev2">Cisco X01-1</td><td class="port">4</td><td class="role">POLR binnen</td><td><span class="swatch" style="background:#9B5FD0"></span></td></tr>
+            <tr data-cable="p1" tabindex="0"><td class="n">4</td><td class="dev2">Cisco X01-1</td><td class="port">5</td><td class="dev2">Palo Alto ION D01</td><td class="port">2</td><td class="role">POLR</td><td><span class="swatch" style="background:#9B5FD0"></span></td></tr>
+            <tr data-cable="p2" tabindex="0"><td class="n">5</td><td class="dev2">Cisco X01-2</td><td class="port">5</td><td class="dev2">Palo Alto ION D02</td><td class="port">2</td><td class="role">POLR</td><td><span class="swatch" style="background:#9B5FD0"></span></td></tr>
+            <tr data-cable="t1" tabindex="0" class="grp"><td class="n">6</td><td class="dev2">Cisco X01-1</td><td class="port">1</td><td class="dev2">Palo Alto ION D01</td><td class="port">5</td><td class="role">trunk</td><td><span class="swatch" style="background:#4FB0E5"></span></td></tr>
+            <tr data-cable="t2" tabindex="0"><td class="n">7</td><td class="dev2">Cisco X01-2</td><td class="port">1</td><td class="dev2">Palo Alto ION D02</td><td class="port">5</td><td class="role">trunk</td><td><span class="swatch" style="background:#4FB0E5"></span></td></tr>
+            <tr data-cable="h1" tabindex="0" class="grp"><td class="n">8</td><td class="dev2">Palo Alto ION D01</td><td class="port">1</td><td class="dev2">Palo Alto ION D02</td><td class="port">4</td><td class="role">bypass-paar</td><td><span class="swatch" style="background:#D3372C"></span></td></tr>
+            <tr data-cable="h2" tabindex="0"><td class="n">9</td><td class="dev2">Palo Alto ION D01</td><td class="port">4</td><td class="dev2">Palo Alto ION D02</td><td class="port">1</td><td class="role">bypass-paar</td><td><span class="swatch" style="background:#D3372C"></span></td></tr>
+            <tr data-cable="ap" tabindex="0" class="grp"><td class="n">10</td><td class="dev2">30× Cisco 9120 AP (Bench 4)</td><td class="port">1</td><td class="dev2">X01-1 · X01-2 · 3e Cisco</td><td class="port">11-20 · 11-20 · 5-20</td><td class="role">access points</td><td><span class="swatch" style="background:#17A2A2"></span></td></tr>
+            <tr data-cable="st" tabindex="0" class="grp"><td class="n">11</td><td class="dev2">Cisco X01-1</td><td class="port">stack</td><td class="dev2">Cisco X01-2</td><td class="port">stack</td><td class="role">stack</td><td><span class="swatch" style="background:#1E4E8C"></span></td></tr>
+            <tr data-cable="c1" tabindex="0" class="grp"><td class="n">12</td><td class="dev2">WTI console server</td><td class="port">?</td><td class="dev2">Cisco X01-1</td><td class="port">console</td><td class="role">out-of-band</td><td><span class="swatch" style="background:#737B85"></span></td></tr>
+            <tr data-cable="c2" tabindex="0"><td class="n">13</td><td class="dev2">WTI console server</td><td class="port">?</td><td class="dev2">Cisco X01-2</td><td class="port">console</td><td class="role">out-of-band</td><td><span class="swatch" style="background:#737B85"></span></td></tr>
+            <tr data-cable="c3" tabindex="0"><td class="n">14</td><td class="dev2">WTI console server</td><td class="port">?</td><td class="dev2">Derde Cisco</td><td class="port">console</td><td class="role">out-of-band</td><td><span class="swatch" style="background:#737B85"></span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Voor je begint te prikken</h2>
+    <div class="checks">
+      <div class="check"><div class="idx">01</div><div>
+        <h3>Plak eerst de labels erop</h3>
+        <p>Van buiten zijn de twee ION 1200-S'en niet uit elkaar te houden, en er staan drie identieke Cisco's naast elkaar. Het model gaat uit van bovenste = D01 en X01-1. Controleer dat één keer in Prisma en op de switch, en plak er daarna labeltape op.</p>
+      </div></div>
+      <div class="check"><div class="idx">02</div><div>
+        <h3>De twee bypass-kabels lopen gekruist</h3>
+        <p>Niet 1 op 1 en 4 op 4, maar <code>D01 poort 1 → D02 poort 4</code> en <code>D01 poort 4 → D02 poort 1</code>. Draai het model opzij, dan zie je de kruising zitten. Dit is de plek waar het in de praktijk misgaat.</p>
+      </div></div>
+      <div class="check"><div class="idx">03</div><div>
+        <h3>Welk poortnummer is het bypass-paar?</h3>
+        <p>De tekening zet de stippellijn om poort 1 en 4, maar de notitie ernaast zegt <code>Port 3 &amp; 4 are Bypass pair</code>. Dat spreekt elkaar tegen. Poort 3 is in dezelfde tekening de INET-poort, dus vraag dit na voordat je prikt — ik heb 1 en 4 aangehouden omdat de lijnen in de tekening daar naartoe lopen.</p>
+      </div></div>
+      <div class="check"><div class="idx">04</div><div>
+        <h3>POLR komt op poort 4 binnen, maar niet overal</h3>
+        <p>De tekening zegt het er zelf bij: <em>POLR Termination port 4 is new standard and it will be 9 in most of the existing sites</em>. Kijk dus eerst of jullie site al op de nieuwe standaard zit voordat je de 5G op poort 4 prikt.</p>
+      </div></div>
+      <div class="check"><div class="idx">05</div><div>
+        <h3>De HA VLAN zit in dezelfde trunk-lijst</h3>
+        <p>VLAN 20 staat als eerste in de toegestane VLAN's van de trunk én is los gelabeld als HA Vlan. Uit de tekening is niet te lezen of dat één trunkkabel is of een tweede aparte kabel naar dezelfde ION. Ik heb het als één trunk gemodelleerd — als het er twee zijn, geef het door en ik pas het aan.</p>
+      </div></div>
+      <div class="check"><div class="idx">06</div><div>
+        <h3>De POLR komt maar op één switch binnen</h3>
+        <p>De 5G gaat alleen naar X01-1 poort 4 en bereikt X01-2 via de stack. Valt de stack weg, dan verliest D02 zijn POLR-pad terwijl D01 hem nog wel heeft. Houd daar rekening mee bij onderhoud aan de stack.</p>
+      </div></div>
+      <div class="check"><div class="idx">07</div><div>
+        <h3>Vul de AP-poorten in vaste volgorde</h3>
+        <p>De dertig Cisco 9120's liggen per twee gestapeld op de middelste plank van Bench 4 en gaan op X01-1 poort 11 t/m 20, X01-2 poort 11 t/m 20 en pas als je daarmee niet uitkomt op de derde Cisco poort 5 t/m 20. Houd die volgorde aan en prik van laag naar hoog, dan is later aan het poortnummer te zien welke AP waar hoort.</p>
+      </div></div>
+      <div class="check"><div class="idx">08</div><div>
+        <h3>De WTI en de derde Cisco staan niet in de nieuwe tekening</h3>
+        <p>Ze staan wel op de bench en de console server hangt aan alle drie de switches. Welke WTI-poort naar welke switch gaat staat nergens — zet dat als poortnaam in de WTI-config, want juist als een switch onbereikbaar is wil je niet gokken.</p>
+      </div></div>
+    </div>
+  </section>
+
+  <footer>3D-model gebouwd naar de foto's van de bench · bekabeling naar de tekening “Palo Alto Prisma SDWAN Edge Site — Standard” · 10 patchkabels + 3 console-kabels</footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ================================================================
+   Kleuren en kabelgegevens — gedeeld door het 3D-model en de
+   platte poorttekeningen eronder.
+   ================================================================ */
+var COL = {
+  wan:'#E9C21B', wanD:'#B08F06',      // INET1 / INET2, de internetlijnen
+  plr:'#9B5FD0', plrD:'#5F2F8C',      // POLR 5G/LTE
+  ha:'#D3372C',  haD:'#96201A',       // bypass-paar tussen de twee ION's
+  lan:'#4FB0E5', lanD:'#2A7CAB',      // trunk switch <-> ION
+  stk:'#1E4E8C', stkD:'#12305B',      // stack tussen de twee switches
+  ap:'#17A2A2',  apD:'#0C6060',       // access points op de vloer
+  con:'#737B85', conD:'#414850',      // console
+  orange:'#FA582D'
+};
+var CABLES = [
+  { id:'w1', kind:'wan', owner:['pa1','wan'], label:'D01 poort 3  \u2192  INET1' },
+  { id:'w2', kind:'wan', owner:['pa2','wan'], label:'D02 poort 3  \u2192  INET2' },
+  { id:'p0', kind:'plr', owner:['cp','sw1'],  label:'POLR 5G/LTE  \u2192  X01-1 poort 4   (was poort 9 op bestaande sites)' },
+  { id:'p1', kind:'plr', owner:['pa1','sw1'], label:'X01-1 poort 5  \u2192  D01 poort 2   (POLR)' },
+  { id:'p2', kind:'plr', owner:['pa2','sw2'], label:'X01-2 poort 5  \u2192  D02 poort 2   (POLR)' },
+  { id:'t1', kind:'lan', owner:['pa1','sw1'], label:'X01-1 poort 1  \u2192  D01 poort 5   (trunk \u2014 VLAN 20, 5, 7, 10, 15, 28, 29, 601, 1101, 2291)' },
+  { id:'t2', kind:'lan', owner:['pa2','sw2'], label:'X01-2 poort 1  \u2192  D02 poort 5   (trunk \u2014 zelfde VLAN-lijst)' },
+  { id:'h1', kind:'ha',  owner:['pa1','pa2'], label:'D01 poort 1  \u2192  D02 poort 4   (bypass-paar, gekruist)' },
+  { id:'h2', kind:'ha',  owner:['pa1','pa2'], label:'D01 poort 4  \u2192  D02 poort 1   (bypass-paar, gekruist)' },
+  { id:'ap', kind:'ap',  owner:['sw1','sw2','sw3'], label:'30\u00d7 Cisco 9120 access point \u2192 X01-1 poort 11-20, X01-2 poort 11-20, derde Cisco poort 5-20' },
+  { id:'st', kind:'stk', owner:['sw1','sw2'], label:'X01-1  \u2192  X01-2   (stack, achterkant)' },
+  { id:'c1', kind:'con', owner:['wti','sw1'], label:'WTI console server  \u2192  X01-1 console (achterkant)' },
+  { id:'c2', kind:'con', owner:['wti','sw2'], label:'WTI console server  \u2192  X01-2 console (achterkant)' },
+  { id:'c3', kind:'con', owner:['wti','sw3'], label:'WTI console server  \u2192  derde Cisco, console (achterkant)' }
+];
+function kindMatches(kind, f) { return f === 'all' || kind === f || (f === 'lan' && kind === 'stk'); }
+function cableLabel(id) { for (var i = 0; i < CABLES.length; i++) if (CABLES[i].id === id) return CABLES[i].label; return ''; }
+
+/* welke poort welke kabel krijgt — gebruikt voor de textuur én de tekening */
+var PA_USE = {
+  1:{ c:'ha',  id:'h1', to:'D02 p4' },  2:{ c:'plr', id:'p1', to:'X01 p5' },
+  3:{ c:'wan', id:'w1', to:'INET' },    4:{ c:'ha',  id:'h2', to:'D02 p1' },
+  5:{ c:'lan', id:'t1', to:'X01 p1' }
+};
+
+var state = { filter:'all', failing:false, hot:null, pc:null };
+
+/* Alles wat een manual kan hebben, plus de gedeelde opslag. Eén artifact = één database,
+   dus wat je hier bewerkt zien alle kijkers meteen. */
+var TARGETS = [];            // [{key, name, group}]
+var LINKS = {};              // devicekey -> manualId
+var MANUALS = {};            // manualId -> manual
+var dataListeners = [];
+function onData(fn) { dataListeners.push(fn); }
+function pushData() { dataListeners.forEach(function (f) { f(); }); }
+/* Deze uitgave leest de manuals uit platte bestanden naast deze pagina,
+   zodat hij overal te hosten is en niets nodig heeft om te draaien. */
+var PAGE_EXT = {};
+var dbP = Promise.resolve(null);
+(function () {
+  function get(u) { return fetch(u).then(function (r) { return r.json(); }); }
+  Promise.all([get('data/manuals.json'), get('data/links.json'), get('data/pages.json')])
+    .then(function (r) {
+      MANUALS = r[0] || {};
+      LINKS = r[1] || {};
+      PAGE_EXT = r[2] || {};
+      pushData();
+    })
+    .catch(function () { pushData(); });
+})();
+function newId() { return 'm' + Math.random().toString(36).slice(2, 10); }
+var listeners = [];
+function onState(fn) { listeners.push(fn); }
+function pushState() { listeners.forEach(function (f) { f(state); }); }
+
+/* ================================================================
+   1. Het 3D-model
+   ================================================================ */
+(function () {
+  "use strict";
+  var stage = document.getElementById('stage');
+  var statusEl = document.getElementById('status');
+
+  if (typeof THREE === 'undefined') {
+    document.getElementById('fallback').style.display = 'block';
+    document.getElementById('hint').style.display = 'none';
+    document.getElementById('reset').style.display = 'none';
+    stage.style.background = 'var(--surface)';
+    return;
+  }
+
+  /* ---------- canvas-texturen voor de voorkanten ---------- */
+  function tex(w, h, draw) {
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    draw(c.getContext('2d'), w, h);
+    var t = new THREE.CanvasTexture(c);
+    t.anisotropy = 8; t.encoding = THREE.sRGBEncoding;
+    return t;
+  }
+  function rr(g, x, y, w, h, r) {
+    g.beginPath();
+    g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+  }
+
+  /* Prisma SDWAN ION 1200-S: 660 x 88 px voor een vlak van 33 x 4.4 cm.
+     Tien RJ45 in vijf kolommen: kolom 1 = poort 1 (boven) en 2 (onder), enzovoort. */
+  var PA_W = 660, PA_H = 88;
+  var PA_PORT = {};
+  (function () {
+    for (var c = 0; c < 5; c++) for (var rw = 0; rw < 2; rw++)
+      PA_PORT[c * 2 + rw + 1] = [237 + 44 * c, rw ? 58 : 26];
+  })();
+  function paFace(name) {
+    return tex(PA_W, PA_H, function (g) {
+      g.fillStyle = '#F1F1EE'; g.fillRect(0, 0, PA_W, PA_H);
+      g.fillStyle = '#C6C8C4'; rr(g, 8, 8, PA_W - 16, PA_H - 16, 4); g.fill();
+      g.fillStyle = COL.orange; g.font = '600 15px "Public Sans", sans-serif';
+      g.fillText('paloalto', 18, 50);
+      g.fillStyle = '#232628';                                  // usb + console
+      rr(g, 96, 20, 16, 12, 2); g.fill(); rr(g, 96, 38, 16, 12, 2); g.fill();
+      rr(g, 120, 30, 20, 26, 3); g.fill();
+      g.fillStyle = '#2E3236'; rr(g, 150, 18, 34, 24, 3); g.fill();   // 2 sfp-sleuven
+      rr(g, 150, 48, 34, 24, 3); g.fill();
+      for (var n = 1; n <= 10; n++) {
+        var p = PA_PORT[n], u = PA_USE[n];
+        g.fillStyle = u ? COL[u.c] : '#232628'; rr(g, p[0] - 19, p[1] - 13, 38, 26, 3); g.fill();
+        g.fillStyle = u ? COL[u.c + 'D'] : '#3C4145'; rr(g, p[0] - 12, p[1] - 7, 24, 14, 2); g.fill();
+      }
+      g.strokeStyle = '#D0453A'; g.lineWidth = 3;                // rood kader om de bypass-poorten
+      rr(g, 259, 8, 46, 72, 4); g.stroke();
+      g.fillStyle = '#4A4F54';                                   // twee voedingen
+      g.beginPath(); g.arc(470, 44, 13, 0, 6.3); g.fill();
+      g.beginPath(); g.arc(506, 44, 13, 0, 6.3); g.fill();
+      g.fillStyle = '#232628'; g.beginPath(); g.arc(536, 44, 8, 0, 6.3); g.fill();
+      ['#39D07A', '#E9C21B', '#E24A3C'].forEach(function (cc, i) {
+        g.fillStyle = cc; g.beginPath(); g.arc(556, 26 + i * 18, 5, 0, 6.3); g.fill();
+      });
+      g.fillStyle = COL.orange; g.font = '700 17px "Public Sans", sans-serif';
+      g.fillText('ION 1200-S', 574, 50);
+      g.fillStyle = '#FFF'; rr(g, 574, 58, 74, 22, 3); g.fill();  // labeltape met de naam
+      g.strokeStyle = '#9AA0A6'; g.lineWidth = 1.5; g.stroke();
+      g.fillStyle = '#15181C'; g.font = '600 15px "IBM Plex Mono", monospace';
+      g.textAlign = 'center'; g.fillText(name, 611, 74); g.textAlign = 'left';
+    });
+  }
+
+  /* Cisco: 890 x 88 px voor een vlak van 44.5 x 4.4 cm */
+  var SW_W = 890, SW_H = 88;
+  function swPort(j, row) { return [175 + 26 * j, row ? 59 : 29]; }
+  var SW_USE_J = { 0:{ id:'t1', num:1, c:'lan' }, 1:{ id:'p0', num:4, c:'plr', row:1 }, 2:{ id:'p1', num:5, c:'plr' } };
+  function swFace(name, faded, apFrom, apTo) {
+    return tex(SW_W, SW_H, function (g) {
+      g.fillStyle = '#C2C6C4'; g.fillRect(0, 0, SW_W, SW_H);
+      g.fillStyle = '#AAAFAD'; rr(g, 6, 8, 34, 72, 3); g.fill();
+      g.fillStyle = '#7E8583';
+      g.beginPath(); g.arc(23, 24, 4, 0, 6.3); g.fill();
+      g.beginPath(); g.arc(23, 64, 4, 0, 6.3); g.fill();
+      g.fillStyle = '#FFF'; rr(g, 48, 27, 100, 34, 4); g.fill();
+      g.strokeStyle = '#9AA0A6'; g.lineWidth = 1.5; g.stroke();
+      g.fillStyle = '#15181C'; g.font = '600 ' + (name.length > 4 ? 15 : 20) + 'px "IBM Plex Mono", monospace';
+      g.textAlign = 'center'; g.fillText(name, 98, 51); g.textAlign = 'left';
+      for (var j = 0; j < 24; j++) for (var row = 0; row < 2; row++) {
+        var p = swPort(j, row), uj = SW_USE_J[j], num = j * 2 + row + 1;
+        var u = (uj && (uj.row || 0) === row) ? uj : null;
+        var isAp = apFrom && num >= apFrom && num <= apTo;
+        var base = u ? COL[u.c] : (isAp ? COL.ap : '#232628');
+        var deep = u ? COL[u.c + 'D'] : (isAp ? COL.apD : '#3C4145');
+        g.fillStyle = base; rr(g, p[0] - 10, p[1] - 13, 20, 26, 3); g.fill();
+        g.fillStyle = deep; rr(g, p[0] - 6, p[1] - 7, 12, 14, 2); g.fill();
+      }
+      g.fillStyle = '#AAAFAD'; rr(g, 800, 20, 70, 48, 4); g.fill();
+      g.fillStyle = '#232628'; rr(g, 810, 30, 44, 12, 2); g.fill();
+      if (faded) { g.fillStyle = 'rgba(0,0,0,.2)'; g.fillRect(0, 0, SW_W, SW_H); }
+    });
+  }
+
+  function plainFace(w, h, draw) { return tex(w, h, draw); }
+
+  /* ---------- scène ---------- */
+  var scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xCFC9BC);            // hal-licht, niet themagebonden
+  scene.fog = new THREE.Fog(0xCFC9BC, 480, 1500);
+
+  var camera = new THREE.PerspectiveCamera(33, 16 / 9, 1, 900);
+  var renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.94;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  stage.appendChild(renderer.domElement);
+
+  scene.add(new THREE.HemisphereLight(0xEFEBE1, 0x7C776E, 0.5));
+  var sun = new THREE.DirectionalLight(0xFFF8EC, 0.85);
+  sun.position.set(60, 235, 145);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  var sc = sun.shadow.camera;
+  sc.left = -165; sc.right = 165; sc.top = 175; sc.bottom = -150; sc.near = 20; sc.far = 520;
+  scene.add(sun);
+  var fill = new THREE.DirectionalLight(0xEAF0F6, 0.22);
+  fill.position.set(-110, 50, 70); scene.add(fill);
+
+  function mat(hex, rough, metal) {
+    return new THREE.MeshStandardMaterial({ color:hex, roughness:rough === undefined ? .75 : rough, metalness:metal || .05 });
+  }
+  function slab(w, h, d, x, y, z, m) {
+    var mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+    mesh.position.set(x, y, z); mesh.castShadow = true; mesh.receiveShadow = true;
+    scene.add(mesh); return mesh;
+  }
+
+  /* ---------- stelling ---------- */
+  var steel = mat(0x1D4E96, .62, .3), beam = mat(0xE8571C, .62, .2), deckM = mat(0xB89B70, .94, 0);
+  slab(178, 2.6, 60, 0, -1.3, -5, deckM);                       // plankdek
+  slab(184, 11, 4.5, 0, -7, 27, beam);                          // voorbalk
+  slab(184, 11, 4.5, 0, -7, -37, beam);                         // achterbalk
+  [[-86, 25], [86, 25], [-86, -35], [86, -35]].forEach(function (p) {
+    slab(8, 178, 6, p[0], 37, p[1], steel);                     // staanders lopen door langs beide planken
+  });
+  /* ---------- het magazijn eromheen ---------- */
+  var FLOOR_Y = -52, CEIL_Y = 530;      // magazijnhoogte, ruim vijf meter boven de vloer                 // vloer op de hoogte van de rekpoten
+  function seeded() { var s = 12345; return function () { s = (s * 16807) % 2147483647; return s / 2147483647; }; }
+  var rnd = seeded();
+
+  // betonvloer met stortnaden
+  var conc = tex(512, 512, function (g) {
+    g.fillStyle = '#B9B5AD'; g.fillRect(0, 0, 512, 512);
+    for (var i = 0; i < 2400; i++) {
+      g.fillStyle = 'rgba(70,66,60,' + (rnd() * 0.06).toFixed(3) + ')';
+      g.fillRect(rnd() * 512, rnd() * 512, 3, 3);
+    }
+    g.strokeStyle = 'rgba(96,92,86,.55)'; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(0, 4); g.lineTo(512, 4); g.moveTo(4, 0); g.lineTo(4, 512); g.stroke();
+  });
+  conc.wrapS = conc.wrapT = THREE.RepeatWrapping; conc.repeat.set(15, 11);
+  var floorMesh = new THREE.Mesh(new THREE.PlaneGeometry(1700, 1300),
+    new THREE.MeshStandardMaterial({ map:conc, roughness:.96, metalness:0 }));
+  floorMesh.rotation.x = -Math.PI / 2; floorMesh.position.set(0, FLOOR_Y, 60);
+  floorMesh.receiveShadow = true; scene.add(floorMesh);
+
+  // muren
+  var wallM = new THREE.MeshStandardMaterial({ color:0xCEC7B6, roughness:.95, side:THREE.DoubleSide });
+  function wall(w, h, x, y, z, ry) {
+    var m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), wallM);
+    m.position.set(x, y, z); m.rotation.y = ry || 0; m.receiveShadow = true; scene.add(m);
+  }
+  wall(1700, 620, 0, FLOOR_Y + 310, -340, 0);
+  wall(1300, 620, -640, FLOOR_Y + 310, 60, Math.PI / 2);
+  wall(1300, 620, 640, FLOOR_Y + 310, 60, Math.PI / 2);
+
+  // golfplaten dak
+  var rib = tex(256, 256, function (g) {
+    g.fillStyle = '#A4A9AD'; g.fillRect(0, 0, 256, 256);
+    for (var i = 0; i < 256; i += 16) {
+      g.fillStyle = 'rgba(255,255,255,.30)'; g.fillRect(i, 0, 6, 256);
+      g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(i + 9, 0, 5, 256);
+    }
+  });
+  rib.wrapS = rib.wrapT = THREE.RepeatWrapping; rib.repeat.set(26, 20);
+  var ceil = new THREE.Mesh(new THREE.PlaneGeometry(1700, 1300),
+    new THREE.MeshStandardMaterial({ map:rib, roughness:.85, side:THREE.DoubleSide }));
+  ceil.rotation.x = Math.PI / 2; ceil.position.set(0, CEIL_Y, 60); scene.add(ceil);
+
+  // houten spanten en TL-balken
+  var woodM = mat(0xC49A5F, .88, 0);
+  var lampM = new THREE.MeshStandardMaterial({ color:0xFFFFFF, emissive:0xFFF4DE, emissiveIntensity:1.05, roughness:.4 });
+  [-260, -110, 40, 190, 340, 490].forEach(function (bz) {
+    var b = new THREE.Mesh(new THREE.BoxGeometry(1700, 34, 48), woodM);
+    b.position.set(0, CEIL_Y - 24, bz); scene.add(b);
+    [-330, 0, 330].forEach(function (lx) {
+      var l = new THREE.Mesh(new THREE.BoxGeometry(230, 8, 16), lampM);
+      l.position.set(lx, CEIL_Y - 66, bz); scene.add(l);
+    });
+  });
+
+  // magazijnstelling met dozen erachter
+  var boxCols = [0xC9A87E, 0xB99367, 0xD2B48C, 0xAE8A5C, 0xC0A075];
+  function storage(cx, cz, bays) {
+    var bw = 132, total = bays * bw;
+    for (var b = 0; b <= bays; b++) slab(9, 330, 9, cx + (b - bays / 2) * bw, FLOOR_Y + 165, cz, steel);
+    [-28, 62, 152, 242].forEach(function (y) {
+      slab(total, 7, 4, cx, y, cz + 15, beam);
+      slab(total, 7, 4, cx, y, cz - 15, beam);
+      for (var i = 0; i < bays * 2; i++) {
+        var w2 = 26 + rnd() * 18, h2 = 19 + rnd() * 15, d2 = 26 + rnd() * 9;
+        var m = new THREE.Mesh(new THREE.BoxGeometry(w2, h2, d2),
+          mat(boxCols[Math.floor(rnd() * boxCols.length)], .96, 0));
+        m.position.set(cx - total / 2 + 30 + i * (total - 60) / (bays * 2 - 1),
+                       y + 3.5 + h2 / 2, cz + (rnd() - 0.5) * 12);
+        m.rotation.y = (rnd() - 0.5) * 0.25;
+        m.castShadow = true; m.receiveShadow = true; scene.add(m);
+      }
+    });
+  }
+  storage(-330, -110, 2); storage(330, -110, 2);
+  storage(-250, -250, 3); storage(250, -250, 3);
+
+  // de rij loopt naar rechts door: drie benches aangebouwd aan de onze,
+  // met gedeelde staanders zoals bij echte palletstelling
+  function benchBay(cx) {                                // leeg: alleen dek en balken
+    [0, 62].forEach(function (yy) {
+      slab(176, 2.6, 60, cx, yy - 1.3, -5, deckM);
+      slab(176, 11, 4.5, cx, yy - 8, 27, beam);
+      slab(176, 11, 4.5, cx, yy - 8, -37, beam);
+    });
+  }
+  [258, 430, 602].forEach(function (ux) {                // gedeelde staanders tussen de bays
+    slab(8, 178, 6, ux, 37, 25, steel);
+    slab(8, 178, 6, ux, 37, -35, steel);
+  });
+  [172, 344, 516].forEach(benchBay);
+
+
+  /* ---------- apparaten ---------- */
+  var DEV = {}, clickables = [];      // alles waar je op kunt klikken voor een manual
+  function device(key, w, h, d, x, yBottom, faceTex, body, top) {
+    var side = mat(body, .68, .08), lid = mat(top, .6, .1);
+    var face = new THREE.MeshStandardMaterial({ map:faceTex, roughness:.55, metalness:.05 });
+    var m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), [side, side, lid, side, face, side]);
+    m.position.set(x, yBottom + h / 2, 8 - d / 2);
+    m.castShadow = true; m.receiveShadow = true;
+    m.userData.key = key;
+    scene.add(m);
+    DEV[key] = { mesh:m, w:w, h:h, d:d, x:x, top:yBottom + h, bottom:yBottom, faceZ:8 };
+    return DEV[key];
+  }
+
+  var LX = -40, RX = 40;
+  var BENCHES = [{ n:'BENCH 3', x:0 }, { n:'BENCH 4', x:172 }, { n:'BENCH 5', x:344 }, { n:'BENCH 6', x:516 }];
+  var WTI_PORT_X = [200, 284, 368];                    // de drie gebruikte seriële poorten
+  device('wti', 44, 4.4, 30, LX, 0, plainFace(880, 88, function (g) {
+    g.fillStyle = '#212427'; g.fillRect(0, 0, 880, 88);
+    g.fillStyle = '#FFF'; rr(g, 18, 26, 104, 36, 4); g.fill();
+    g.fillStyle = '#15181C'; g.font = '600 20px "IBM Plex Mono", monospace';
+    g.textAlign = 'center'; g.fillText('WTI', 70, 51); g.textAlign = 'left';
+    for (var i = 0; i < 16; i++) {                     // rij seriële poorten
+      var px = 158 + i * 42, on = WTI_PORT_X.indexOf(px) > -1;
+      g.fillStyle = on ? COL.con : '#34393D'; rr(g, px - 16, 30, 32, 28, 3); g.fill();
+      g.fillStyle = on ? COL.conD : '#4A5055'; rr(g, px - 10, 36, 20, 16, 2); g.fill();
+    }
+    ['#39D07A', '#E9C21B'].forEach(function (c, i) {
+      g.fillStyle = c; g.beginPath(); g.arc(846, 32 + i * 24, 6, 0, 6.3); g.fill();
+    });
+  }), 0x212427, 0x31363A);
+  device('pa2', 33, 4.4, 24, LX, 4.4, paFace('D02'), 0xF1F1EE, 0xFBFBF8);
+  device('pa1', 33, 4.4, 24, LX, 8.8, paFace('D01'), 0xF1F1EE, 0xFBFBF8);
+  device('cp', 27, 3.8, 20, LX, 13.2, plainFace(540, 76, function (g) {
+    g.fillStyle = '#212427'; g.fillRect(0, 0, 540, 76);
+    g.fillStyle = '#2A2F33'; rr(g, 10, 8, 520, 14, 3); g.fill();
+    ['#3E86F0', '#39D07A', '#E9C21B'].forEach(function (c, i) {
+      g.fillStyle = c; g.beginPath(); g.arc(34 + i * 20, 48, 6, 0, 6.3); g.fill();
+    });
+    g.fillStyle = '#B9BEC2'; g.font = '500 17px "Public Sans", sans-serif'; g.fillText('cradlepoint', 110, 54);
+  }), 0x212427, 0x31363A);
+
+  device('sw3', 44.5, 4.4, 30, RX, 0, swFace('3e Cisco', false, 5, 20), 0xC2C6C4, 0xD6D9D7);
+  device('sw2', 44.5, 4.4, 30, RX, 4.4, swFace('X01-2', false, 11, 20), 0xC2C6C4, 0xD6D9D7);
+  device('sw1', 44.5, 4.4, 30, RX, 8.8, swFace('X01-1', false, 11, 20), 0xC2C6C4, 0xD6D9D7);
+
+  // antennes van de 5G-router
+  var antM = mat(0x2A2E32, .6, .2), antennas = [];
+  [-8, 0, 8].forEach(function (dx, i) {
+    var a = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 17, 10), antM.clone());
+    a.position.set(LX + dx, 17 + 8.5, -4);
+    a.rotation.z = (i - 1) * 0.13;
+    a.castShadow = true; scene.add(a); antennas.push(a);
+  });
+  DEV.cp.extra = antennas;
+
+  // WAN-invoerkastje tegen de linkerstaander
+  var wanBox = slab(15, 12, 6, -80, 27, 14, mat(0xB9BEC2, .7, .1));
+  wanBox.userData.key = 'wan';
+  var wanJacks = [[-83.5, 'B'], [-76.5, 'A']].map(function (p) {
+    var j = new THREE.Mesh(new THREE.BoxGeometry(4, 3.2, 1.2), mat(0x232628, .6, .1));
+    j.position.set(p[0], 28, 17.4); scene.add(j); return j;
+  });
+  DEV.wan = { mesh:wanBox, extra:wanJacks };
+
+  var DEV_NAME = { pa1:'Palo Alto ION D01', pa2:'Palo Alto ION D02', sw1:'Cisco X01-1',
+                   sw2:'Cisco X01-2', sw3:'Derde Cisco', wti:'WTI console server',
+                   cp:'Cradlepoint POLR 5G', wan:'INET-invoer' };
+  Object.keys(DEV).forEach(function (k) {
+    DEV[k].mesh.userData.man = { key:k, name:DEV_NAME[k] || k };
+    TARGETS.push({ key:k, name:DEV_NAME[k] || k, group:'Bench 3 — netwerk' });
+    clickables.push(DEV[k].mesh);
+  });
+
+  /* ---------- bovenste plank: zes werkplekken ---------- */
+  var UY = 62;                                            // hoogte van het bovenste plankdek
+  slab(178, 2.6, 60, 0, UY - 1.3, -5, deckM);
+  slab(184, 11, 4.5, 0, UY - 8, 27, beam);
+  slab(184, 11, 4.5, 0, UY - 8, -37, beam);
+
+  // het handgeschreven "BENCH 3" op de voorbalk
+  BENCHES.forEach(function (b) {
+    var t2 = new THREE.Mesh(new THREE.PlaneGeometry(21, 5.6),
+      new THREE.MeshBasicMaterial({ map:tex(300, 80, function (g) {
+        g.fillStyle = '#F2EFE6'; rr(g, 2, 2, 296, 76, 6); g.fill();
+        g.fillStyle = '#1A1D20'; g.font = '600 40px "IBM Plex Mono", monospace';
+        g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(b.n, 150, 44);
+      }), transparent:true }));
+    t2.position.set(b.x - 60, UY - 7.5, 29.4); scene.add(t2);
+  });
+
+  /* ---------- één werkplek: monitor + M90q die eruit schuift ---------- */
+  var PCS = [], monitorPicks = [];
+  var caseM = mat(0x24272B, .68, .12), bezelM = mat(0x131619, .55, .12),
+      vesaM = mat(0x3A3F44, .7, .25), pcM = mat(0x2B3036, .58, .18);
+
+  function workstation(idx, x, z, rot, name) {
+    var G = new THREE.Group();
+    G.position.set(x, UY, z); G.rotation.y = rot; scene.add(G);
+
+    function part(w, h, d, px, py, pz, m) {
+      var me = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+      me.position.set(px, py, pz); me.castShadow = true; me.receiveShadow = true; G.add(me); return me;
+    }
+    part(24, 1.6, 15, 0, 0.8, -5, caseM);                         // monitorvoet
+    part(7, 15, 4.5, 0, 8.3, -5.2, caseM);                        // hals, tot aan het paneel
+    part(6, 4.6, 4.2, 0, 14, -3.4, caseM);                        // armpje naar de achterkant
+    part(34, 1.6, 12, 0, 0.8, 12, caseM);                         // toetsenbord
+
+    var panel = new THREE.Mesh(new THREE.BoxGeometry(44, 26, 2.6), bezelM);   // donkere behuizing
+    panel.position.set(0, 24, -2); panel.castShadow = true; panel.receiveShadow = true;
+    panel.userData.pc = idx; G.add(panel);
+    var scr = new THREE.MeshBasicMaterial({ color:0xF2F6F8 });                // vlak verlicht beeld
+    var screen = new THREE.Mesh(new THREE.PlaneGeometry(40, 21), scr);
+    screen.position.set(0, 25.2, -0.65); screen.userData.pc = idx; G.add(screen);
+    var chin = new THREE.Mesh(new THREE.BoxGeometry(3, 0.9, 0.4), mat(0xC03A2E, .5, .1));
+    chin.position.set(0, 12.9, -0.6); G.add(chin);
+    monitorPicks.push(panel, screen);
+    var wsKey = 'ws' + (idx + 1);
+    TARGETS.push({ key:wsKey, name:name, group:'Bench 3 — werkplekken' });
+    [panel, screen].forEach(function (m) {
+      m.userData.man = { key:wsKey, name:name }; clickables.push(m);
+    });
+
+    part(20, 20, 1.4, 0, 24, -4.0, vesaM);                        // VESA-beugel tegen het paneel
+
+    // de Lenovo M90q zelf
+    var pc = new THREE.Group(); G.add(pc);
+    var body = new THREE.Mesh(new THREE.BoxGeometry(18, 18, 4.2), pcM);
+    body.castShadow = true; body.receiveShadow = true; pc.add(body);
+    var strip = new THREE.Mesh(new THREE.BoxGeometry(0.4, 14, 3.4), mat(0x33383D, .6, .2));
+    strip.position.set(9.1, 0, 0); pc.add(strip);                 // zijkant met poorten
+    var dot = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.6, 1.6), mat(0xD32E2E, .5, .1));
+    dot.position.set(9.3, 7, -1); pc.add(dot);                    // rood Lenovo-stipje
+    var usb = new THREE.Mesh(new THREE.BoxGeometry(5.4, 1.9, 1.5), mat(0xD94F2B, .5, .1));
+    usb.position.set(12, -5.5, 0.6); pc.add(usb);                 // USB image-stick
+    var usbTip = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.3, 1.1), mat(0xA8AEB4, .4, .7));
+    usbTip.position.set(9.6, -5.5, 0.6); pc.add(usbTip);
+
+    var TUCK = new THREE.Vector3(0, 24, -7.4), OUT = new THREE.Vector3(41, 25, 23);
+
+    // naamplaatje en lijntje terug naar de beugel, zichtbaar zodra hij eruit komt
+    var lbl = new THREE.Sprite(new THREE.SpriteMaterial({
+      map:tex(640, 230, function (g) {
+        g.fillStyle = '#15181C'; rr(g, 4, 4, 632, 222, 20); g.fill();
+        g.fillStyle = '#FFFFFF'; g.font = '600 44px "IBM Plex Mono", monospace';
+        g.textAlign = 'left'; g.textBaseline = 'middle'; g.fillText('Lenovo M90q', 34, 48);
+        g.font = '400 34px "Public Sans", sans-serif';
+        [['#4FA85F', 'netwerkkabel'], ['#D94F2B', 'USB image-stick']].forEach(function (r2, i) {
+          var y = 118 + i * 56;
+          g.fillStyle = r2[0]; g.beginPath(); g.arc(50, y, 13, 0, 6.3); g.fill();
+          g.fillStyle = '#D6DBE0'; g.fillText(r2[1], 78, y + 2);
+        });
+      }), transparent:true, depthTest:false, sizeAttenuation:false, opacity:0 }));
+    lbl.scale.set(0.152, 0.055, 1); lbl.renderOrder = 12; G.add(lbl);
+    var guide = new THREE.Line(new THREE.BufferGeometry(),
+      new THREE.LineBasicMaterial({ color:0x7C8894, transparent:true, opacity:0, depthTest:false }));
+    guide.renderOrder = 8; G.add(guide);
+
+    // netwerkkabel: blijft in de muur zitten, hangt mee als de pc naar buiten komt
+    var eth = new THREE.Mesh(new THREE.BufferGeometry(), mat(0x4FA85F, .45, .05));
+    eth.castShadow = true; G.add(eth);
+    var ethBoot = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.3, 2.4), mat(0x2F7942, .5, .05));
+    G.add(ethBoot);
+
+    function place(t) {
+      var e = t * t * (3 - 2 * t);                                // zachte in/uit
+      pc.position.lerpVectors(TUCK, OUT, e);
+      pc.rotation.set(-0.16 * e, -0.62 * e, 0);                    // draait naar je toe
+      pc.scale.setScalar(1 + 0.32 * e);                            // en komt wat dichterbij in beeld
+      var p = pc.position;
+      var off = new THREE.Vector3(-7.5, -9.2, 0.6).multiplyScalar(pc.scale.x).applyEuler(pc.rotation);
+      var a = p.clone().add(off);
+      var w = new THREE.Vector3(13, 1.6, -19);
+      var curve = new THREE.CatmullRomCurve3([
+        a,
+        new THREE.Vector3(a.x - 1, a.y - 6, a.z + 1),
+        new THREE.Vector3((a.x + w.x) / 2, Math.min(a.y - 8, 6), (a.z + w.z) / 2 + 3),
+        new THREE.Vector3(w.x + 3, w.y + 3, w.z + 8),
+        w
+      ], false, 'catmullrom', 0.35);
+      if (eth.geometry) eth.geometry.dispose();
+      eth.geometry = new THREE.TubeGeometry(curve, 46, 0.38, 8, false);
+      ethBoot.position.set(a.x, a.y, a.z);
+
+      var show = Math.min(1, Math.max(0, (t - 0.15) / 0.5));
+      lbl.position.set(p.x, p.y + 17 + 5 * (1 - e), p.z + 2);
+      lbl.material.opacity = show;
+      guide.geometry.dispose();
+      guide.geometry = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, 24, -4.9), p.clone()]);
+      guide.material.opacity = show * 0.75;
+    }
+    place(0);
+    var myMats = [];                                  // eigen materialen per werkplek
+    G.traverse(function (o) {
+      if (!o.material || o.isSprite || o.isLine) return;   // labels sturen hun eigen doorzichtigheid
+      o.material = Array.isArray(o.material) ? o.material.map(function (m) { return m.clone(); }) : o.material.clone();
+      (Array.isArray(o.material) ? o.material : [o.material]).forEach(function (m) {
+        if (myMats.indexOf(m) === -1) myMats.push(m);
+      });
+    });
+    PCS.push({ t:0, target:0, place:place, name:name, mats:myMats,
+               base:myMats.map(function (m) { return m.color.clone(); }),
+               msg:name + ' — de Lenovo M90q zit in de VESA-beugel achter het scherm. Erin: de netwerkkabel en de USB image-stick.' });
+  }
+
+  [-52, 0, 52].forEach(function (x, i) { workstation(i, x, 14, 0, 'Werkplek ' + (i + 1) + ' (voorste rij)'); });
+  [-52, 0, 52].forEach(function (x, i) { workstation(i + 3, x, -24, Math.PI, 'Werkplek ' + (i + 4) + ' (achterste rij)'); });
+
+  /* ---------- zes Toshiba all-in-one kassa's op de bovenste plank van Bench 4 ---------- */
+  function register(idx, x, z, rot, name) {
+    var G = new THREE.Group();
+    G.position.set(x, UY, z); G.rotation.y = rot; scene.add(G);
+    var bodyM = mat(0x2E3134, .62, .16), bezM = mat(0x16181A, .5, .18),
+        footM = mat(0x1E2124, .7, .12);
+    function part(w, h, d, px, py, pz, m, parent) {
+      var me = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+      me.position.set(px, py, pz); me.castShadow = true; me.receiveShadow = true;
+      (parent || G).add(me); return me;
+    }
+
+    part(35, 1.2, 27, 0, 0.6, -2, footM);                      // dunne voetplaat
+    var base = new THREE.Mesh(new THREE.CylinderGeometry(21.2, 24.0, 5, 4), bodyM);
+    base.position.set(0, 3.7, -2); base.rotation.y = Math.PI / 4;   // taps toelopende sokkel
+    base.castShadow = true; base.receiveShadow = true; G.add(base);
+    part(6, 3.4, 5, 15, 4.2, -12, footM);                      // aansluitblok achter rechts
+
+    var arm = part(11, 20, 3.4, 0, 15, -6.5, bodyM);           // scharnierarm
+    arm.rotation.x = 0.12;
+    part(2.8, 11, 7.5, 17.5, 20, -6, bezM);                    // klantendisplay opzij
+
+    var head = new THREE.Group();                              // scherm op het scharnier
+    head.position.set(0, 23, -5.5); G.add(head);
+    var scr = new THREE.Mesh(new THREE.BoxGeometry(34, 21, 2.4), bezM);
+    scr.position.set(0, 9.5, 2); scr.castShadow = true;
+    scr.userData.pc = idx; head.add(scr);
+    var face = new THREE.Mesh(new THREE.PlaneGeometry(29, 16), new THREE.MeshBasicMaterial({ color:0xE9EEF1 }));
+    face.position.set(0, 10.6, 3.25); face.userData.pc = idx; head.add(face);
+    part(7, 0.9, 0.3, 0, 1.4, 3.3, mat(0x9AA0A6, .6, .2), head); // TOSHIBA-streepje op de rand
+    monitorPicks.push(scr, face);
+    var regKey = 'reg' + (idx - 5);
+    TARGETS.push({ key:regKey, name:name, group:'Bench 4 — registers' });
+    [scr, face].forEach(function (m) { m.userData.man = { key:regKey, name:name }; clickables.push(m); });
+
+    var TILT_IN = -0.26, TILT_OUT = -0.72;
+    head.rotation.x = TILT_IN;
+
+    var lbl = new THREE.Sprite(new THREE.SpriteMaterial({
+      map:tex(560, 120, function (g) {
+        g.fillStyle = '#15181C'; rr(g, 4, 4, 552, 112, 20); g.fill();
+        g.fillStyle = '#FFFFFF'; g.font = '600 46px "IBM Plex Mono", monospace';
+        g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(name, 280, 63);
+      }), transparent:true, depthTest:false, sizeAttenuation:false, opacity:0 }));
+    lbl.scale.set(0.132, 0.0283, 1); lbl.renderOrder = 12; G.add(lbl);
+
+    function place(t) {
+      var e = t * t * (3 - 2 * t);
+      head.rotation.x = TILT_IN + (TILT_OUT - TILT_IN) * e;    // kantelt op zijn scharnier
+      lbl.position.set(0, 13 + 2 * (1 - e), 16);
+      lbl.material.opacity = Math.min(1, Math.max(0, (t - 0.15) / 0.5));
+    }
+    place(0);
+
+    var myMats = [];
+    G.traverse(function (o) {
+      if (!o.material || o.isSprite || o.isLine) return;
+      o.material = Array.isArray(o.material) ? o.material.map(function (m) { return m.clone(); }) : o.material.clone();
+      (Array.isArray(o.material) ? o.material : [o.material]).forEach(function (m) {
+        if (myMats.indexOf(m) === -1) myMats.push(m);
+      });
+    });
+    PCS.push({ t:0, target:0, place:place, name:name, mats:myMats,
+               base:myMats.map(function (m) { return m.color.clone(); }),
+               msg:name + ' — Toshiba all-in-one kassa op Bench 4. Het scherm zit op een scharnier: het kantelt naar de kassière of naar de klant. Rechts zit het klantendisplay.' });
+  }
+
+  [120, 172, 224].forEach(function (x, i) { register(i + 6, x, 14, 0, 'Register ' + (i + 1)); });
+  [120, 172, 224].forEach(function (x, i) { register(i + 9, x, -24, Math.PI, 'Register ' + (i + 4)); });
+
+  /* ---------- Bench 5: Apple-hoek boven, printers op de plank eronder ---------- */
+  (function () {
+    var B5 = 344;
+    var alu = mat(0xD3D6D6, .45, .55), white = mat(0xEFEFEC, .6, .06),
+        dark = mat(0x1C1F22, .55, .12), hp = mat(0xE3E2DD, .8, .04),
+        hpDark = mat(0x8E8F8B, .8, .06), zeb = mat(0x3A3E42, .7, .12),
+        zebDoor = mat(0x8E959B, .5, .3), glow = new THREE.MeshBasicMaterial({ color:0xE9EEF1 });
+
+    function prop(idx, x, y, z, name, msg, lblY, build, key) {
+      var G = new THREE.Group(); G.position.set(x, y, z); scene.add(G);
+      var picks = [];
+      function part(w, h, d, px, py, pz, m) {
+        var me = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+        me.position.set(px, py, pz); me.castShadow = true; me.receiveShadow = true;
+        G.add(me); picks.push(me); return me;
+      }
+      function plane(w, h, px, py, pz, rx) {
+        var me = new THREE.Mesh(new THREE.PlaneGeometry(w, h), glow);
+        me.position.set(px, py, pz); if (rx) me.rotation.x = rx; G.add(me); picks.push(me); return me;
+      }
+      build(part, plane, G);
+      TARGETS.push({ key:key, name:name, group:'Bench 5' });
+      picks.forEach(function (p) {
+        p.userData.pc = idx; monitorPicks.push(p);
+        p.userData.man = { key:key, name:name }; clickables.push(p);
+      });
+
+      var lbl = new THREE.Sprite(new THREE.SpriteMaterial({
+        map:tex(620, 120, function (g) {
+          g.fillStyle = '#15181C'; rr(g, 4, 4, 612, 112, 20); g.fill();
+          g.fillStyle = '#FFFFFF'; g.font = '600 44px "IBM Plex Mono", monospace';
+          g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(name, 306, 63);
+        }), transparent:true, depthTest:false, sizeAttenuation:false, opacity:0 }));
+      lbl.scale.set(0.145, 0.028, 1); lbl.renderOrder = 12; G.add(lbl);
+      function place(t) {
+        var e = t * t * (3 - 2 * t);
+        lbl.position.set(0, lblY + 3 * (1 - e), 18);
+        lbl.material.opacity = Math.min(1, Math.max(0, (t - 0.15) / 0.5));
+      }
+      place(0);
+      var myMats = [];
+      G.traverse(function (o) {
+        if (!o.material || o.isSprite || o.isLine) return;
+        o.material = Array.isArray(o.material) ? o.material.map(function (m) { return m.clone(); }) : o.material.clone();
+        (Array.isArray(o.material) ? o.material : [o.material]).forEach(function (m) {
+          if (myMats.indexOf(m) === -1) myMats.push(m);
+        });
+      });
+      PCS.push({ t:0, target:0, place:place, name:name, mats:myMats,
+                 base:myMats.map(function (m) { return m.color.clone(); }), msg:msg });
+      return G;
+    }
+
+    // iMac
+    prop(12, B5 - 46, UY, 12, 'iMac',
+         'iMac op Bench 5, bovenste plank. Ernaast staat de Mac mini met zijn eigen scherm.', 46,
+      function (part, plane) {
+        part(21, 1.1, 15, 0, 0.55, 6, alu);                       // voet
+        part(3.6, 14, 8.5, 0, 7.5, 1, alu);                       // blad
+        part(46, 28, 1.6, 0, 28, 3, white);                       // scherm met kin
+        part(46, 4, 1.7, 0, 15.6, 3.05, white);
+        plane(41, 21.5, 0, 29.6, 3.9);
+      }, 'imac');
+
+    // Mac mini met eigen monitor
+    prop(13, B5 + 46, UY, 12, 'Mac mini + monitor',
+         'De Mac mini staat naast het scherm en is daarop aangesloten. Bench 5, bovenste plank.', 44,
+      function (part, plane, G) {
+        part(24, 1.6, 15, 0, 0.8, -5, dark);                      // monitorvoet
+        part(7, 15, 4.5, 0, 8.3, -5.2, dark);                     // hals
+        part(6, 4.6, 4.2, 0, 14, -3.4, dark);                     // armpje
+        part(44, 26, 2.6, 0, 24, -2, dark);
+        plane(39, 20, 0, 25, -0.6);
+        var mini = part(20, 3.6, 20, -30, 1.8, 12, alu);          // Mac mini ernaast
+        part(20, 0.7, 20, -30, 0.35, 12, dark);
+        part(1.6, 0.4, 1.6, -30, 3.7, 12, mat(0x9AA0A6, .5, .3));
+        var c = new THREE.CatmullRomCurve3([                      // kabeltje naar het scherm
+          new THREE.Vector3(-21, 2.4, 14), new THREE.Vector3(-14, 1.6, 12),
+          new THREE.Vector3(-6, 2.2, 2), new THREE.Vector3(-1, 6, -7)
+        ], false, 'catmullrom', 0.4);
+        var w = new THREE.Mesh(new THREE.TubeGeometry(c, 32, 0.32, 8, false), mat(0xCFD2D4, .6, .1));
+        w.castShadow = true; G.add(w);
+      }, 'macmini');
+
+    // drie HP printers
+    [0, 1, 2].forEach(function (i) {
+      prop(14 + i, B5 - 58 + i * 42, 0, -6, 'HP printer ' + (i + 1),
+           'HP printer ' + (i + 1) + ' op Bench 5, middelste plank.', 40,
+        function (part, plane) {
+          part(38, 26, 40, 0, 13, 0, hp);                         // romp
+          part(30, 2.4, 26, 0, 26.6, 2, hpDark);                  // uitvoerbak
+          part(38, 5, 15, 0, 28.5, -12, hp);                      // bovenklep achter
+          part(36, 3.4, 3, 0, 4, 20.6, hpDark);                   // papierlade voor
+          part(11, 1.2, 7, 12, 28.2, 13, dark);
+          plane(7, 3.4, 12, 28.9, 13, -Math.PI / 2);
+        }, 'hp' + (i + 1));
+    });
+
+    // Zebra ZT411 labelprinter
+    prop(17, B5 + 68, 0, -4, 'Zebra ZT411',
+         'Zebra ZT411 labelprinter op Bench 5, middelste plank, naast de drie HP printers.', 44,
+      function (part, plane) {
+        part(28, 34, 46, 0, 17, 0, zeb);
+        part(1.8, 27, 35, 14.4, 18, -2, zebDoor);                 // mediadeur opzij
+        part(23, 2, 1.4, 0, 12, 23.3, dark);                      // labeluitgang
+        part(12, 7, 0.8, 0, 26, 23.4, dark);
+        plane(9, 4.6, 0, 26, 23.9);
+        part(4, 4, 0.8, 9, 26, 23.4, mat(0x6B7278, .6, .2));
+      }, 'zebra');
+  })();
+
+
+  /* ---------- poortposities in de wereld ---------- */
+  function paPortPos(devKey, n) {
+    var D = DEV[devKey], p = PA_PORT[n];
+    return new THREE.Vector3(
+      D.x - D.w / 2 + (p[0] / PA_W) * D.w,
+      D.top - (p[1] / PA_H) * D.h,
+      D.faceZ);
+  }
+  function swPortPos(devKey, num) {
+    var D = DEV[devKey], j = Math.floor((num - 1) / 2), p = swPort(j, (num - 1) % 2);
+    return new THREE.Vector3(
+      D.x - D.w / 2 + (p[0] / SW_W) * D.w,
+      D.top - (p[1] / SW_H) * D.h,
+      D.faceZ);
+  }
+  function V(x, y, z) { return new THREE.Vector3(x, y, z); }
+  function out(p, dz) { return V(p.x, p.y, p.z + dz); }
+
+  /* ---------- kabels ---------- */
+  var cableMeshes = {}, cableEnds = {};
+  function cable(id, kind, pts, bootZ) {
+    if (!cableEnds[id]) cableEnds[id] = [pts[0].clone(), pts[pts.length - 1].clone()];
+    var curve = new THREE.CatmullRomCurve3(pts, false, 'catmullrom', 0.4);
+    var geo = new THREE.TubeGeometry(curve, 140, 0.42, 10, false);
+    var m = new THREE.MeshStandardMaterial({ color:COL[kind], roughness:.42, metalness:.05 });
+    var mesh = new THREE.Mesh(geo, m);
+    mesh.castShadow = true;
+    mesh.userData.cable = id; mesh.userData.kind = kind;
+    scene.add(mesh);
+    // connectorhuisjes aan beide uiteinden
+    var boot = new THREE.MeshStandardMaterial({ color:COL[kind + 'D'], roughness:.5 });
+    [pts[0], pts[pts.length - 1]].forEach(function (p, i) {
+      var b = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.2, 2.4), boot);
+      b.position.set(p.x, p.y, p.z + ((bootZ && i === 1) ? bootZ : 1.0)); scene.add(b);
+      mesh.userData.boots = (mesh.userData.boots || []).concat([b]);
+    });
+    mesh.userData.base = mesh.material.color.clone();
+    (cableMeshes[id] = cableMeshes[id] || []).push(mesh);
+    return mesh;
+  }
+
+  var pa1p = {}, pa2p = {};
+  [1, 2, 3, 4, 5].forEach(function (n) { pa1p[n] = paPortPos('pa1', n); pa2p[n] = paPortPos('pa2', n); });
+  var sw1p1 = swPortPos('sw1', 1), sw1p4 = swPortPos('sw1', 4), sw1p5 = swPortPos('sw1', 5);
+  var sw2p1 = swPortPos('sw2', 1), sw2p5 = swPortPos('sw2', 5);
+  var cpFront = V(LX + 6, 15, 8);                          // voorkant van de Cradlepoint
+
+  // INET: de twee internetlijnen komen op poort 3 van elke ION binnen
+  cable('w1', 'wan', [pa1p[3], out(pa1p[3], 5), V(-56, 17, 22), V(-71, 25, 20), V(-78.5, 28.5, 18.6), V(-76.5, 28, 17.6)]);
+  cable('w2', 'wan', [pa2p[3], out(pa2p[3], 5), V(-58, 11, 25), V(-75, 20, 22), V(-85, 27, 19), V(-83.5, 28, 17.6)]);
+
+  // Bypass-paar: twee gekruiste kabels tussen D01 en D02
+  cable('h1', 'ha', [pa1p[1], out(pa1p[1], 4), V(-57, 11, 17), V(-65, 8.5, 20), V(-58, 6, 17), out(pa2p[4], 4), pa2p[4]]);
+  cable('h2', 'ha', [pa1p[4], out(pa1p[4], 4), V(-51, 10, 14), V(-55, 8.6, 16), V(-49, 7.4, 14), out(pa2p[1], 4), pa2p[1]]);
+
+  // POLR: 5G binnen op X01-1 poort 4, en van poort 5 van elke switch naar poort 2 van de ION
+  cable('p0', 'plr', [cpFront, out(cpFront, 5), V(-16, 15.5, 24), V(4, 14, 26), V(20, 12.6, 22), out(sw1p4, 5), sw1p4]);
+  cable('p1', 'plr', [pa1p[2], out(pa1p[2], 5), V(-20, 6.4, 19), V(-2, 4.4, 21), V(14, 6.6, 19), out(sw1p5, 5), sw1p5]);
+  cable('p2', 'plr', [pa2p[2], out(pa2p[2], 5), V(-20, 2.4, 23), V(-2, 1.0, 25), V(14, 2.6, 23), out(sw2p5, 5), sw2p5]);
+
+  // Trunk: poort 1 van elke switch naar poort 5 van de bijbehorende ION
+  cable('t1', 'lan', [pa1p[5], out(pa1p[5], 5), V(-18, 8.5, 15), V(0, 6.5, 16), V(12, 8.6, 15), out(sw1p1, 5), sw1p1]);
+  cable('t2', 'lan', [pa2p[5], out(pa2p[5], 5), V(-18, 4.2, 18), V(0, 2.6, 20), V(12, 4.4, 18), out(sw2p1, 5), sw2p1]);
+
+  // Stack: achterlangs tussen de twee switches
+  var stkA = V(RX + 16, DEV.sw1.top - 2.2, 8 - 30), stkB = V(RX + 16, DEV.sw2.top - 2.2, 8 - 30);
+  [stkA, stkB].forEach(function (p) {
+    var b = new THREE.Mesh(new THREE.BoxGeometry(3.4, 2.6, 1.4), mat(0x1A1D20, .6, .1));
+    b.position.set(p.x, p.y, p.z - 0.7); scene.add(b);
+  });
+  cable('st', 'stk', [stkA, V(stkA.x, stkA.y, stkA.z - 5), V(RX + 25, (stkA.y + stkB.y) / 2, stkA.z - 10),
+                      V(stkB.x, stkB.y, stkB.z - 5), stkB], -1.0);
+
+  /* ---------- 30 Cisco Catalyst 9120 access points, per twee gestapeld op Bench 4 ---------- */
+  (function () {
+    function puckGeo(w, r, h, bev) {
+      var s = new THREE.Shape(), x = -w / 2, y = -w / 2;
+      s.moveTo(x + r, y);
+      s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+      s.lineTo(x + w, y + w - r); s.quadraticCurveTo(x + w, y + w, x + w - r, y + w);
+      s.lineTo(x + r, y + w); s.quadraticCurveTo(x, y + w, x, y + w - r);
+      s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+      var g = new THREE.ExtrudeGeometry(s, { depth:h, bevelEnabled:bev > 0, bevelSize:bev,
+                                             bevelThickness:bev, bevelSegments:3, curveSegments:10 });
+      g.rotateX(-Math.PI / 2);
+      return g;
+    }
+    var rimGeo = puckGeo(23, 6, 1.4, 0.5), shellGeo = puckGeo(20.4, 5.4, 2.6, 1.1);
+    var rimM = mat(0xD8DAD8, .75, .04), shellM = mat(0xF2F3F1, .62, .04);
+    var dotM = mat(0x9AA0A2, .6, .1);
+
+    // switchpoorten: X01-1 en X01-2 elk 11 t/m 20, de derde Cisco 5 t/m 20
+    var slots = [];
+    for (var n = 11; n <= 20; n++) slots.push(['sw1', n]);
+    for (n = 11; n <= 20; n++) slots.push(['sw2', n]);
+    for (n = 5; n <= 20; n++) slots.push(['sw3', n]);
+
+    // vijftien stapels van twee, op de middelste plank van Bench 4
+    var BX = 172, k = 0;
+    for (var rIdx = 0; rIdx < 2; rIdx++) {
+      for (var c = 0; c < 8; c++) {
+        if (k >= 15) break;
+        var ax = BX - 71.75 + c * 20.5, az = -18 + rIdx * 24;
+        for (var lvl = 0; lvl < 2; lvl++) {
+          var idx = k * 2 + lvl;
+          var ay = 0.5 + lvl * 5.6;                             // per twee op elkaar
+          var g2 = new THREE.Group(); g2.position.set(ax, ay, az);
+          g2.rotation.y = ((idx * 37) % 11 - 5) * 0.010;        // heel licht scheef, als neergelegd
+          scene.add(g2);
+          var rim = new THREE.Mesh(rimGeo, rimM); rim.castShadow = true; rim.receiveShadow = true; g2.add(rim);
+          var shell = new THREE.Mesh(shellGeo, shellM); shell.position.y = 1.2;
+          shell.castShadow = true; shell.receiveShadow = true; g2.add(shell);
+          var dot = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.3, 2.2), dotM);
+          dot.position.set(0, 4.6, 1.5); g2.add(dot);
+
+          var sw = slots[idx][0], port = slots[idx][1];
+          var bp = swPortPos(sw, port);
+          var ap0 = V(ax - 9, ay + 3.2, az + 9);
+          cable('ap', 'ap', [
+            ap0, V(ap0.x - 5, ap0.y + 1.5, ap0.z + 5),
+            V((ap0.x + 86) / 2, 3.6, 21),
+            V(84 + (idx % 5) * 1.5, 3.2, 18 - (idx % 3) * 1.4),
+            V(70, 5.5, 14),
+            out(bp, 6), bp
+          ]);
+        }
+        k++;
+      }
+    }
+  })();
+
+  // Console: van de WTI voorlangs, om de switchstapel heen, naar de console-poort op de achterkant
+  var REAR_Z = 8 - 30;                                   // achterkant van de switches
+  var conPortM = mat(0x1A1D20, .6, .1);
+  var wtiFront = WTI_PORT_X.map(function (px) {
+    var D = DEV.wti;
+    return V(D.x - D.w / 2 + (px / 880) * D.w, D.top - 2.2, D.faceZ);
+  });
+  [['sw1', 11], ['sw2', 6.6], ['sw3', 2.2]].forEach(function (p, i) {
+    var b = new THREE.Mesh(new THREE.BoxGeometry(3.4, 2.6, 1.4), conPortM);
+    b.position.set(52, p[1], REAR_Z - 0.7); scene.add(b);
+    cable('c' + (i + 1), 'con', [
+      wtiFront[i], out(wtiFront[i], 4),
+      V(-12 + i * 2, 1.4 - i * 0.25, 17 + i * 3),
+      V(30 + i * 2, 1.1 - i * 0.2, 16 + i * 3),
+      V(70 + i * 3, 3.5 - i * 0.6, 10 + i * 2),
+      V(76 + i * 3, p[1] * 0.7 + 2, -6),
+      V(64, p[1], REAR_Z + 2),
+      V(52, p[1], REAR_Z - 1.4)
+    ], -1.0);
+  });
+
+  /* ---------- genummerde verwijzingen ---------- */
+  function numberSprite(n) {
+    var t = tex(128, 128, function (g) {
+      g.clearRect(0, 0, 128, 128);
+      g.fillStyle = '#FFFFFF'; g.beginPath(); g.arc(64, 64, 52, 0, 6.3); g.fill();
+      g.strokeStyle = '#15181C'; g.lineWidth = 7; g.stroke();
+      g.fillStyle = '#15181C'; g.font = '600 62px "IBM Plex Mono", monospace';
+      g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(String(n), 64, 68);
+    });
+    var s = new THREE.Sprite(new THREE.SpriteMaterial({ map:t, transparent:true, depthTest:false, sizeAttenuation:false }));
+    s.scale.set(0.052, 0.052, 1);
+    s.renderOrder = 10;
+    return s;
+  }
+  var calloutObjs = [];
+  function callout(n, at, to) {
+    var s = numberSprite(n); s.position.copy(at); scene.add(s); calloutObjs.push(s);
+    var g = new THREE.BufferGeometry().setFromPoints([at, to]);
+    var l = new THREE.Line(g, new THREE.LineBasicMaterial({ color:0x6c7683, transparent:true, opacity:.9, depthTest:false }));
+    l.renderOrder = 9; scene.add(l); calloutObjs.push(l);
+  }
+  callout(1, V(-71, 39, 16), V(-77, 33.5, 15));
+  callout(2, V(-70, 30, 14), V(-54, 15.4, 10));
+  callout(3, V(-70, 19, 14), V(-56.5, 11.2, 10));
+  callout(4, V(-70, 8, 14), V(-56.5, 6.8, 10));
+  callout(5, V(-70, -3, 14), V(-62, 2.2, 12));
+  callout(6, V(74, 24, 14), V(62.3, 11.2, 10));
+  callout(7, V(74, 11, 14), V(62.3, 6.8, 10));
+  callout(8, V(74, -2, 14), V(62.3, 2.2, 10));
+
+  var alarm = new THREE.Sprite(new THREE.SpriteMaterial({
+    map:tex(512, 128, function (g) {
+      g.fillStyle = '#C02F26'; rr(g, 4, 26, 504, 76, 12); g.fill();
+      g.fillStyle = '#FFFFFF'; g.font = '600 40px "IBM Plex Mono", monospace';
+      g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('X01-1: TRUNK WEG', 256, 66);
+    }), transparent:true, depthTest:false, sizeAttenuation:false }));
+  alarm.scale.set(0.30, 0.075, 1); alarm.position.set(RX, 20, 8); alarm.renderOrder = 11; alarm.visible = false;
+  scene.add(alarm);
+
+  /* ---------- eigen orbit-besturing ---------- */
+  var HOME = { az:-0.12, pol:1.39, r:306, tx:0, ty:27, tz:-2 };
+  var cam = { az:HOME.az, pol:HOME.pol, r:HOME.r };
+  var target = new THREE.Vector3(HOME.tx, HOME.ty, HOME.tz);
+  var dirty = true;
+
+  function updateCamera() {
+    cam.pol = Math.max(0.18, Math.min(1.52, cam.pol));
+    cam.r = Math.max(35, Math.min(760, cam.r));
+    camera.position.set(
+      target.x + cam.r * Math.sin(cam.pol) * Math.sin(cam.az),
+      target.y + cam.r * Math.cos(cam.pol),
+      target.z + cam.r * Math.sin(cam.pol) * Math.cos(cam.az));
+    camera.lookAt(target);
+    dirty = true;
+  }
+
+  // langs de rij benches schuiven met de pijlen
+  var benchIdx = 0, wantX = 0;
+  var nameEl = document.getElementById('benchName');
+  var prevB = document.getElementById('prevBench'), nextB = document.getElementById('nextBench');
+  function gotoBench(i) {
+    benchIdx = Math.max(0, Math.min(BENCHES.length - 1, i));
+    wantX = BENCHES[benchIdx].x;
+    nameEl.textContent = BENCHES[benchIdx].n;
+    prevB.disabled = benchIdx === 0;
+    nextB.disabled = benchIdx === BENCHES.length - 1;
+    dirty = true;
+  }
+  prevB.addEventListener('click', function () { gotoBench(benchIdx - 1); });
+  nextB.addEventListener('click', function () { gotoBench(benchIdx + 1); });
+
+  var drag = null, pointers = {};
+  function pos(ev) { return { x:ev.clientX, y:ev.clientY }; }
+  var downPt = null;
+  stage.addEventListener('pointerdown', function (ev) {
+    if (ev.target.tagName === 'BUTTON') return;
+    if (ev.target.closest && ev.target.closest('#manualWrap')) return;
+    downPt = { x:ev.clientX, y:ev.clientY };
+    stage.focus({ preventScroll:true });
+    if (W.fp && mode === 'walk' && !locked() && !lockBlocked) grabMouse();
+    stage.setPointerCapture(ev.pointerId);
+    pointers[ev.pointerId] = pos(ev);
+    drag = { x:ev.clientX, y:ev.clientY, pan:ev.shiftKey || ev.button === 1 || ev.button === 2 };
+    stage.classList.add('grabbing');
+  });
+  stage.addEventListener('contextmenu', function (ev) { ev.preventDefault(); });
+  stage.addEventListener('pointermove', function (ev) {
+    if (pointers[ev.pointerId]) pointers[ev.pointerId] = pos(ev);
+    var ids = Object.keys(pointers);
+    if (ids.length === 2) {                                        // knijpen = zoomen
+      var a = pointers[ids[0]], b = pointers[ids[1]];
+      var d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (drag && drag.pinch) { cam.r *= drag.pinch / d; updateCamera(); }
+      drag = drag || {}; drag.pinch = d;
+      return;
+    }
+    if (drag) {
+      var dx = ev.clientX - drag.x, dy = ev.clientY - drag.y;
+      drag.x = ev.clientX; drag.y = ev.clientY;
+      if (mode === 'walk') {
+        W.yaw -= dx * 0.0055;
+        W.pitch = Math.max(-0.45, Math.min(0.55, W.pitch - dy * 0.0035));
+      } else if (drag.pan) {
+        var right = new THREE.Vector3().crossVectors(camera.up, camera.getWorldDirection(new THREE.Vector3())).normalize();
+        var up = new THREE.Vector3(0, 1, 0);
+        var k = cam.r * 0.0016;
+        target.addScaledVector(right, dx * k).addScaledVector(up, dy * k);
+        wantX = target.x;
+      } else {
+        cam.az -= dx * 0.006;
+        cam.pol -= dy * 0.006;
+      }
+      updateCamera();
+    } else {
+      hover(ev);
+    }
+  });
+  function endDrag(ev) {
+    delete pointers[ev.pointerId];
+    if (Object.keys(pointers).length === 0) { drag = null; stage.classList.remove('grabbing'); }
+  }
+  stage.addEventListener('pointerup', function (ev) {
+    if (downPt && Object.keys(pointers).length <= 1 &&
+        Math.abs(ev.clientX - downPt.x) < 5 && Math.abs(ev.clientY - downPt.y) < 5) {
+      var b = stage.getBoundingClientRect();
+      if (locked()) { ndc.x = 0; ndc.y = 0; }                 // richtkruis in het midden
+      else {
+        ndc.x = ((ev.clientX - b.left) / b.width) * 2 - 1;
+        ndc.y = -((ev.clientY - b.top) / b.height) * 2 + 1;
+      }
+      ray.setFromCamera(ndc, camera);
+      if (QUIZ.on) {
+        var hq = ray.intersectObjects(QUIZ.marks, false)[0];
+        if (hq) { quizPick(hq.object); downPt = null; endDrag(ev); return; }
+      }
+      var h2 = ray.intersectObjects(clickables, false)[0];
+      if (h2 && h2.object.userData.man) showManual(h2.object.userData.man);
+    }
+    downPt = null;
+    endDrag(ev);
+  });
+  stage.addEventListener('pointercancel', endDrag);
+  stage.addEventListener('pointerleave', function (ev) { endDrag(ev); setHot(null, null); });
+  stage.addEventListener('wheel', function (ev) {
+    if (ev.target.closest && ev.target.closest('#manualWrap')) return;   // paneel scrollt zelf
+    ev.preventDefault();
+    if (mode === 'walk') {
+      W.dist = Math.max(150, Math.min(560, W.dist * Math.pow(1.0011, ev.deltaY)));
+      return;
+    }
+    cam.r *= Math.pow(1.0016, ev.deltaY);
+    updateCamera();
+  }, { passive:false });
+  document.getElementById('reset').addEventListener('click', function () {
+    cam.az = HOME.az; cam.pol = HOME.pol; cam.r = HOME.r;
+    target.set(BENCHES[benchIdx].x, HOME.ty, HOME.tz);
+    wantX = target.x;
+    updateCamera();
+  });
+
+
+  /* ================= rondlopen: bestuurbaar mannetje ================= */
+  var mode = 'orbit';
+  var W = {
+    x:0, z:200, vx:0, vz:0, ax:0, az:0, fp:false, stepFlag:false,                 // positie en snelheid
+    yaw:Math.PI, pitch:0.05,                // waar de camera heen kijkt (doel)
+    cyaw:Math.PI, cpitch:0.05,              // en waar hij nu staat — vandaar de vering
+    face:Math.PI, dist:330, fov:58,
+    jy:0, jv:0, grounded:true, squash:1,
+    phase:0, sp:0, keys:{}
+  };
+  var camPos = new THREE.Vector3(), camAim = new THREE.Vector3(), tmpV = new THREE.Vector3();
+  var BLOCK = [];
+  [0, 172, 344, 516].forEach(function (b) { BLOCK.push([b - 90, b + 90, -42, 32]); });
+  BLOCK.push([-400, -258, -132, -88], [258, 400, -132, -88],
+             [-322, -178, -272, -228], [178, 322, -272, -228]);
+
+  /* ---- het mannetje, met heupen, knieën, schouders en ellebogen ---- */
+  var guy = new THREE.Group(); guy.visible = false; scene.add(guy);
+  var BODY = new THREE.Group(); guy.add(BODY);                 // alles boven de voeten
+  (function () {
+    var vestM = mat(0xE8A821, .7, .06), darkM = mat(0x2B3138, .8, .04),
+        skinM = mat(0xC99A6E, .8, .03), hairM = mat(0x33281F, .9, .02),
+        shoeM = mat(0x16181A, .7, .1), stripeM = mat(0xF2F4F6, .5, .3);
+    function p(w, h, d, x, y, z, m, into) {
+      var me = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+      me.position.set(x, y, z); me.castShadow = true; me.receiveShadow = true;
+      (into || BODY).add(me); return me;
+    }
+    function limb(side, hipY) {
+      var hip = new THREE.Group(); hip.position.set(side * 9, hipY, 0); BODY.add(hip);
+      p(15, 32, 16, 0, -16, 0, darkM, hip);                    // bovenbeen
+      var knee = new THREE.Group(); knee.position.set(0, -32, 0); hip.add(knee);
+      p(13, 30, 15, 0, -15, 0, darkM, knee);                   // onderbeen
+      p(14, 8, 17, 0, -32, 1, shoeM, knee);                    // schoen
+      return { hip:hip, knee:knee };
+    }
+    function arm(side, shY) {
+      var sh = new THREE.Group(); sh.position.set(side * 22, shY, 0); BODY.add(sh);
+      p(10, 24, 12, 0, -12, 0, darkM, sh);                     // bovenarm, shirtkleur
+      var el = new THREE.Group(); el.position.set(0, -24, 0); sh.add(el);
+      p(9, 20, 11, 0, -10, 0, darkM, el);                      // onderarm
+      p(10, 9, 12, 0, -23, 0, skinM, el);                      // hand
+      return { sh:sh, el:el };
+    }
+    W.L = limb(-1, 62); W.R = limb(1, 62);
+    p(34, 44, 20, 0, 86, 0, darkM);                            // romp
+    p(37, 30, 23, 0, 88, 0, vestM);                            // hesje
+    p(37, 3, 24, 0, 96, 0, stripeM); p(37, 3, 24, 0, 82, 0, stripeM);
+    W.AL = arm(-1, 104); W.AR = arm(1, 104);
+    W.head = new THREE.Group(); W.head.position.set(0, 110, 0); BODY.add(W.head);
+    p(20, 20, 19, 0, 10, 0, skinM, W.head);
+    p(21, 7, 20, 0, 21, 0, hairM, W.head);
+    p(22, 4, 8, 0, 18, -10, hairM, W.head);
+  })();
+
+  function inBox(x, z) {
+    for (var i = 0; i < BLOCK.length; i++) {
+      var b = BLOCK[i];
+      if (x > b[0] - 15 && x < b[1] + 15 && z > b[2] - 15 && z < b[3] + 15) return true;
+    }
+    return false;
+  }
+  function angleTo(a, b) { var d = (b - a) % (Math.PI * 2);
+    if (d > Math.PI) d -= Math.PI * 2; if (d < -Math.PI) d += Math.PI * 2; return d; }
+  function ease(rate, dt) { return 1 - Math.exp(-rate * dt); }   // framerate-onafhankelijk
+
+  function placeCamera(instant) {
+    var eye = FLOOR_Y + 112 + W.jy * 0.55;
+    if (W.fp) {                                              // door zijn eigen ogen
+      camPos.set(W.x + Math.sin(W.cyaw) * 6, FLOOR_Y + 128 + W.jy, W.z + Math.cos(W.cyaw) * 6);
+      camAim.set(camPos.x + Math.sin(W.cyaw) * 100, camPos.y + W.cpitch * 110,
+                 camPos.z + Math.cos(W.cyaw) * 100);
+      camera.position.copy(camPos); camera.lookAt(camAim);
+      guy.visible = false; dirty = true; return;
+    }
+    guy.visible = (mode === 'walk');
+    tmpV.set(W.x - Math.sin(W.cyaw) * W.dist * Math.cos(W.cpitch),
+             eye + 46 + Math.sin(W.cpitch) * W.dist,
+             W.z - Math.cos(W.cyaw) * W.dist * Math.cos(W.cpitch));
+    if (instant) camPos.copy(tmpV); else camPos.lerp(tmpV, ease(9, W.dt || 0.016));
+    tmpV.set(W.x + Math.sin(W.cyaw) * 150, FLOOR_Y + 76 + W.jy * 0.6 - W.cpitch * 80,
+             W.z + Math.cos(W.cyaw) * 150);   // op borsthoogte richten, anders vallen zijn voeten uit beeld
+    if (instant) camAim.copy(tmpV); else camAim.lerp(tmpV, ease(11, W.dt || 0.016));
+    camera.position.copy(camPos);
+    camera.lookAt(camAim);
+    dirty = true;
+  }
+
+  var lastT = 0;
+  function stepWalk(now) {
+    if (mode !== 'walk') { lastT = 0; return; }
+    var dt = lastT ? Math.max(0, Math.min(0.05, (now - lastT) / 1000)) : 0.016;
+    lastT = now; W.dt = dt;
+
+    var k = W.keys;
+    var fwd = (k.w || k.arrowup ? 1 : 0) - (k.s || k.arrowdown ? 1 : 0) + W.az;
+    var str = (k.d ? 1 : 0) - (k.a ? 1 : 0) + W.ax;
+    fwd = Math.max(-1, Math.min(1, fwd)); str = Math.max(-1, Math.min(1, str));
+    if (k.arrowleft) W.yaw += 2.0 * dt;
+    if (k.arrowright) W.yaw -= 2.0 * dt;
+
+    // blik veert naar het doel toe
+    W.cyaw += angleTo(W.cyaw, W.yaw) * ease(16, dt);
+    W.cpitch += (W.pitch - W.cpitch) * ease(16, dt);
+
+    // snelheid loopt op en af in plaats van aan/uit
+    var run = k.shift ? 1 : 0, top = run ? 320 : 165;
+    var tx = 0, tz = 0;
+    if (Math.abs(fwd) > 0.02 || Math.abs(str) > 0.02) {
+      var n = Math.hypot(fwd, str);
+      tx = (Math.sin(W.cyaw) * fwd - Math.cos(W.cyaw) * str) / n * top;
+      tz = (Math.cos(W.cyaw) * fwd + Math.sin(W.cyaw) * str) / n * top;
+    }
+    var a = ease((fwd || str) ? 9 : 13, dt);
+    W.vx += (tx - W.vx) * a; W.vz += (tz - W.vz) * a;
+    if (Math.abs(W.vx) < 0.6) W.vx = 0;
+    if (Math.abs(W.vz) < 0.6) W.vz = 0;
+
+    var dx = W.vx * dt, dz = W.vz * dt;
+    if (!inBox(W.x + dx, W.z)) W.x += dx; else W.vx = 0;
+    if (!inBox(W.x, W.z + dz)) W.z += dz; else W.vz = 0;
+    W.x = Math.max(-560, Math.min(560, W.x));
+    W.z = Math.max(-285, Math.min(430, W.z));
+
+    // springen
+    if (k[' '] && W.grounded) { W.jv = 250; W.grounded = false; W.squash = 1.14; blip(300, 520, 0.10, 0.10); }
+    if (!W.grounded) {
+      W.jy += W.jv * dt; W.jv -= 900 * dt;
+      if (W.jy <= 0) { W.jy = 0; W.jv = 0; W.grounded = true; W.squash = 0.82;
+                       burst(180, 0.9, 0.22, 0.16, 'lowpass'); }
+    }
+    W.squash += (1 - W.squash) * ease(11, dt);
+
+    // richting draait mee met de looprichting
+    W.sp = Math.hypot(W.vx, W.vz);
+    var norm = Math.min(1, W.sp / 165);
+    if (W.sp > 6) W.face += angleTo(W.face, Math.atan2(W.vx, W.vz)) * ease(12, dt);
+
+    // gang
+    W.phase += W.sp * 0.042 * dt * (run ? 1.12 : 1);   // ~2 stappen per seconde bij looptempo
+    var stride = 0.20 + norm * 0.17, sw = Math.sin(W.phase);   // ~21° per been, niet 39°
+    var knee = 0.30 + norm * 0.38;
+    W.L.hip.rotation.x = sw * stride;
+    W.R.hip.rotation.x = -sw * stride;
+    W.L.knee.rotation.x = -Math.max(0, -sw) * knee;            // knie buigt in de zwaai
+    W.R.knee.rotation.x = -Math.max(0, sw) * knee;
+    var arm = 0.30 + norm * 0.26;                              // ~30° zwaai, tegen de benen in
+    W.AL.sh.rotation.x = -sw * arm;
+    W.AR.sh.rotation.x = sw * arm;
+    W.AL.el.rotation.x = -0.16 - Math.max(0, -sw) * 0.40;      // elleboog buigt in de voorzwaai
+    W.AR.el.rotation.x = -0.16 - Math.max(0, sw) * 0.40;
+    if (!W.grounded) {                                   // in de lucht: benen op, armen omhoog
+        var air = ease(14, dt);
+        W.L.hip.rotation.x += (0.32 - W.L.hip.rotation.x) * air;
+        W.R.hip.rotation.x += (-0.16 - W.R.hip.rotation.x) * air;
+        W.L.knee.rotation.x += (-0.85 - W.L.knee.rotation.x) * air;
+        W.R.knee.rotation.x += (-0.35 - W.R.knee.rotation.x) * air;
+        W.AL.sh.rotation.x += (-0.95 - W.AL.sh.rotation.x) * air;
+        W.AR.sh.rotation.x += (-0.95 - W.AR.sh.rotation.x) * air;
+    }
+    var half = Math.sin(W.phase) >= 0;                      // twee stappen per cyclus
+    if (norm > 0.12 && half !== W.stepFlag) {
+      W.stepFlag = half;
+      burst(240 + Math.random() * 90, 1.1, 0.10 + norm * 0.10, 0.13, 'lowpass');
+    }
+    var breathe = Math.sin(now * 0.0022) * (1 - norm) * 0.9;
+    BODY.position.y = Math.abs(Math.sin(W.phase)) * 2.4 * norm + breathe;
+    BODY.rotation.x = norm * 0.06 + (run ? 0.05 : 0);     // licht voorover bij rennen
+    BODY.rotation.z = Math.sin(W.phase) * 0.04 * norm;
+    W.head.rotation.x = -BODY.rotation.x * 0.8 - W.cpitch * 0.25;
+    guy.position.set(W.x, FLOOR_Y + W.jy, W.z);
+    guy.rotation.y = W.face;
+    guy.scale.set(2 - W.squash, W.squash, 2 - W.squash);
+
+    var wantFov = 58 + norm * (run ? 8 : 3);
+    if (Math.abs(camera.fov - wantFov) > 0.05) {
+      camera.fov += (wantFov - camera.fov) * ease(6, dt);
+      camera.updateProjectionMatrix();
+    }
+    updatePrompt();
+    placeCamera(false);
+  }
+
+  var focusHint = document.getElementById('focusHint');
+  function hideFocusHint() { focusHint.hidden = true; }
+  function setMode(m) {
+    mode = m;
+    var on = m === 'walk';
+    guy.visible = on;
+    if (!on) { focusHint.hidden = true; promptEl.hidden = true; W.fp = false; }
+    document.getElementById('walkBtn').textContent = on ? 'Overzicht' : 'Rondlopen';
+    document.getElementById('reset').hidden = on;
+    document.getElementById('prevBench').hidden = on;
+    document.getElementById('nextBench').hidden = on;
+    document.getElementById('benchName').hidden = on;
+    document.getElementById('hint').innerHTML = on
+      ? 'WASD = lopen · E = manual · spatie = springen · shift = rennen · F = eerste persoon'
+      : 'sleep = draaien · scroll = zoomen · <b>klik op een apparaat voor de manual</b>';
+    calloutObjs.forEach(function (o) { o.visible = !on; });
+    camera.fov = on ? 58 : 33; camera.updateProjectionMatrix();
+    if (on) {
+      buildUsePoints();
+      W.keys = {}; W.ax = W.az = 0; W.vx = W.vz = 0; lastT = 0;
+      W.cyaw = W.yaw; W.cpitch = W.pitch;
+      guy.position.set(W.x, FLOOR_Y, W.z);
+      placeCamera(true);
+      document.getElementById('stage').focus({ preventScroll:true });
+      focusHint.hidden = false;
+      setTimeout(function () { focusHint.hidden = true; }, 3200);
+    } else { if (locked()) document.exitPointerLock(); crossEl.hidden = true; updateCamera(); }
+  }
+  document.getElementById('walkBtn').addEventListener('click', function () {
+    setMode(mode === 'walk' ? 'orbit' : 'walk');
+  });
+  function onKey(down) { return function (ev) {
+    var t = ev.target.tagName;
+    if (t === 'INPUT' || t === 'TEXTAREA') return;
+    var k = (ev.key || '').toLowerCase();
+    if (!manualEl.hidden) {                        // blad open: lezen, niet lopen
+      if (down && (k === 'x' || k === 'escape')) { ev.preventDefault(); closeManual(); }
+      W.keys = {}; W.ax = W.az = 0;
+      return;
+    }
+    if (mode !== 'walk') return;
+    if (k === 'shift') { W.keys.shift = down; return; }
+    if (down && k === 'e') { ev.preventDefault(); useNearest(); return; }
+    if (down && k === 'f') { ev.preventDefault(); toggleFirstPerson(); return; }
+    var moves = ('wasd'.indexOf(k) > -1 && k.length === 1) || k.indexOf('arrow') === 0 || k === ' ';
+    var scrolls = moves || k === 'pageup' || k === 'pagedown' || k === 'home' || k === 'end' || k === 'spacebar';
+    if (!scrolls) return;
+    ev.preventDefault(); ev.stopPropagation();
+    if (moves) { W.keys[k === 'spacebar' ? ' ' : k] = down; if (down) hideFocusHint(); }
+  }; }
+  document.addEventListener('keydown', onKey(true), true);
+  document.addEventListener('keyup', onKey(false), true);
+  window.addEventListener('blur', function () { W.keys = {}; });
+
+
+  /* ================= geluid: alles gesynthetiseerd, geen bestanden ================= */
+  var SND = { on:false, ctx:null, master:null, lastStep:0 };
+  function soundInit() {
+    if (SND.ctx) return;
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    SND.ctx = new AC();
+    SND.master = SND.ctx.createGain();
+    SND.master.gain.value = 0.0001;
+    SND.master.connect(SND.ctx.destination);
+
+    var hum = SND.ctx.createGain(); hum.gain.value = 0.055; hum.connect(SND.master);
+    [46, 69.5, 93].forEach(function (f, i) {                 // lage brom van een hal
+      var o = SND.ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f;
+      var g = SND.ctx.createGain(); g.gain.value = 0.5 / (i + 1);
+      o.connect(g); g.connect(hum); o.start();
+    });
+    var nb = SND.ctx.createBuffer(1, SND.ctx.sampleRate * 2, SND.ctx.sampleRate);
+    var d = nb.getChannelData(0);
+    for (var i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * 0.35;
+    SND.noise = nb;
+    var air = SND.ctx.createBufferSource(); air.buffer = nb; air.loop = true;
+    var lp = SND.ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 320;
+    var ag = SND.ctx.createGain(); ag.gain.value = 0.04;
+    air.connect(lp); lp.connect(ag); ag.connect(SND.master); air.start();
+  }
+  function burst(freq, q, vol, len, type) {
+    if (!SND.on || !SND.ctx) return;
+    var s = SND.ctx.createBufferSource(); s.buffer = SND.noise;
+    s.playbackRate.value = 0.6 + Math.random() * 0.5;
+    var f = SND.ctx.createBiquadFilter(); f.type = type || 'bandpass';
+    f.frequency.value = freq; f.Q.value = q;
+    var g = SND.ctx.createGain();
+    var t = SND.ctx.currentTime;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    s.connect(f); f.connect(g); g.connect(SND.master);
+    s.start(t); s.stop(t + len + 0.02);
+  }
+  function blip(f0, f1, vol, len) {
+    if (!SND.on || !SND.ctx) return;
+    var o = SND.ctx.createOscillator(), g = SND.ctx.createGain(), t = SND.ctx.currentTime;
+    o.type = 'triangle'; o.frequency.setValueAtTime(f0, t);
+    o.frequency.exponentialRampToValueAtTime(f1, t + len);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    o.connect(g); g.connect(SND.master); o.start(t); o.stop(t + len + 0.02);
+  }
+  function setSound(on) {
+    SND.on = on;
+    if (on) { soundInit(); if (SND.ctx && SND.ctx.state === 'suspended') SND.ctx.resume(); }
+    if (SND.master) SND.master.gain.setTargetAtTime(on ? 0.9 : 0.0001,
+      SND.ctx ? SND.ctx.currentTime : 0, 0.15);
+    var b = document.getElementById('soundBtn');
+    b.textContent = on ? 'Geluid uit' : 'Geluid aan';
+    b.setAttribute('aria-pressed', String(on));
+  }
+  document.getElementById('soundBtn').addEventListener('click', function () { setSound(!SND.on); });
+
+  /* ================= punten waar je iets kunt bekijken ================= */
+  var USE_POINTS = [];
+  function buildUsePoints() {
+    var byKey = {};
+    clickables.forEach(function (m) {
+      var man = m.userData.man; if (!man) return;
+      var p = new THREE.Vector3(); m.getWorldPosition(p);
+      var e = byKey[man.key] || (byKey[man.key] = { key:man.key, name:man.name, n:0, sum:new THREE.Vector3() });
+      e.sum.add(p); e.n++;
+    });
+    USE_POINTS = Object.keys(byKey).map(function (k) {
+      var e = byKey[k];
+      return { key:e.key, name:e.name, pos:e.sum.multiplyScalar(1 / e.n) };
+    });
+  }
+
+  var promptEl = document.getElementById('usePrompt');
+  var nearTarget = null, projV = new THREE.Vector3();
+  function updatePrompt() {
+    if (mode !== 'walk') { promptEl.hidden = true; nearTarget = null; return; }
+    var best = null, bd = 1e9;
+    for (var i = 0; i < USE_POINTS.length; i++) {
+      var p = USE_POINTS[i].pos;
+      var d = (p.x - W.x) * (p.x - W.x) + (p.z - W.z) * (p.z - W.z);
+      if (d < bd) { bd = d; best = USE_POINTS[i]; }
+    }
+    if (!best || bd > 115 * 115) { promptEl.hidden = true; nearTarget = null; return; }
+    nearTarget = best;
+    projV.copy(best.pos).project(camera);
+    if (projV.z > 1) { promptEl.hidden = true; return; }
+    var b = stage.getBoundingClientRect();
+    promptEl.style.left = ((projV.x * 0.5 + 0.5) * b.width) + 'px';
+    promptEl.style.top = ((-projV.y * 0.5 + 0.5) * b.height) + 'px';
+    promptEl.innerHTML = '<b>E</b> ' + best.name;
+    promptEl.hidden = false;
+  }
+  function useNearest() {
+    if (nearTarget) { blip(680, 980, 0.14, 0.09); showManual(nearTarget); }
+  }
+  promptEl.addEventListener('click', useNearest);
+
+  /* ================= eerste persoon met muisvergrendeling ================= */
+  var crossEl = document.getElementById('crosshair');
+  var lockTried = false, lockBlocked = false;
+  function locked() { return document.pointerLockElement === stage; }
+  function grabMouse() {
+    if (!stage.requestPointerLock || locked()) return;
+    lockTried = true;
+    try {
+      var r = stage.requestPointerLock({ unadjustedMovement:true });
+      if (r && r.catch) r.catch(function () { try { stage.requestPointerLock(); } catch (e) {} });
+    } catch (e) { try { stage.requestPointerLock(); } catch (e2) {} }
+    setTimeout(function () {                    // niet gelukt? dan mag het venster het niet
+      if (lockTried && !locked() && W.fp) { lockBlocked = true; fpHint(); }
+    }, 350);
+  }
+  document.addEventListener('pointerlockerror', function () { lockBlocked = true; fpHint(); });
+  document.addEventListener('pointerlockchange', function () {
+    if (locked()) { lockBlocked = false; lockTried = false; }
+    fpHint();
+    dirty = true;
+  });
+  document.addEventListener('mousemove', function (ev) {      // vrij kijken zolang de muis vast zit
+    if (!locked() || mode !== 'walk') return;
+    W.yaw -= ev.movementX * 0.0022;
+    W.pitch = Math.max(-0.75, Math.min(0.75, W.pitch - ev.movementY * 0.0018));
+  });
+  function fpHint() {
+    var h = document.getElementById('hint');
+    if (!W.fp) {
+      h.innerHTML = 'WASD = lopen · E = manual · F = eerste persoon · spatie = springen · shift = rennen';
+      return;
+    }
+    h.innerHTML = locked()
+      ? 'WASD = lopen · E = manual · muis = kijken · Esc = muis vrijgeven · F = terug'
+      : (lockBlocked
+        ? 'WASD = lopen · E = manual · <b>sleep om te kijken</b> — muisvergrendeling is hier niet toegestaan'
+        : 'WASD = lopen · E = manual · <b>klik om de muis te vangen</b> · F = terug');
+  }
+  function toggleFirstPerson() {
+    W.fp = !W.fp;
+    crossEl.hidden = !W.fp;
+    if (W.fp) grabMouse(); else if (locked()) document.exitPointerLock();
+    fpHint();
+    placeCamera(true);
+  }
+
+  /* ================= touchbesturing ================= */
+  (function () {
+    var pad = document.getElementById('touchPad'), knob = pad.querySelector('i');
+    var jump = document.getElementById('touchJump');
+    var padId = null, cx = 0, cy = 0, R = 46;
+    function show() {
+      if (pad.dataset.shown) return;
+      pad.dataset.shown = '1'; pad.hidden = false; jump.hidden = false;
+    }
+    window.addEventListener('touchstart', show, { once:true, passive:true });
+    pad.addEventListener('pointerdown', function (ev) {
+      ev.stopPropagation();
+      var r = pad.getBoundingClientRect(); cx = r.left + r.width / 2; cy = r.top + r.height / 2;
+      padId = ev.pointerId; pad.setPointerCapture(ev.pointerId); move(ev);
+    });
+    pad.addEventListener('pointermove', function (ev) { if (padId === ev.pointerId) { ev.stopPropagation(); move(ev); } });
+    function end(ev) {
+      if (padId !== ev.pointerId) return;
+      padId = null; W.ax = W.az = 0; knob.style.transform = 'translate(-50%,-50%)';
+    }
+    pad.addEventListener('pointerup', end); pad.addEventListener('pointercancel', end);
+    function move(ev) {
+      var dx = ev.clientX - cx, dy = ev.clientY - cy;
+      var d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / R);
+      W.ax = (dx / d) * k; W.az = -(dy / d) * k;
+      knob.style.transform = 'translate(calc(-50% + ' + (dx / d * k * R) + 'px), calc(-50% + ' + (dy / d * k * R) + 'px))';
+    }
+    jump.addEventListener('pointerdown', function (ev) {
+      ev.stopPropagation(); W.keys[' '] = true;
+      setTimeout(function () { W.keys[' '] = false; }, 90);
+    });
+  })();
+
+
+  /* ================= oefenen: prik de bench zelf ================= */
+  var QUIZ = { on:false, i:0, wrong:0, picked:null, marks:[], list:[] };
+  var markGroup = new THREE.Group(); markGroup.visible = false; scene.add(markGroup);
+  var markGeo = new THREE.SphereGeometry(4.2, 14, 10);
+
+  function buildMarks() {
+    if (QUIZ.marks.length) return;
+    Object.keys(cableEnds).forEach(function (id) {
+      if (id === 'ap') return;
+      cableEnds[id].forEach(function (p, side) {
+        var m = new THREE.Mesh(markGeo, new THREE.MeshStandardMaterial({
+          color:0xF2F4F6, emissive:0x2A54A4, emissiveIntensity:0.6, roughness:.4 }));
+        m.position.copy(p);
+        m.userData.end = id + ':' + side;
+        m.renderOrder = 6;
+        markGroup.add(m); QUIZ.marks.push(m);
+      });
+    });
+  }
+  function markState() {
+    var task = QUIZ.list[QUIZ.i];
+    QUIZ.marks.forEach(function (m) {
+      var mine = task && m.userData.end.indexOf(task.id + ':') === 0;
+      var done = QUIZ.picked === m.userData.end;
+      m.material.color.setHex(done ? 0x39D07A : 0xF2F4F6);
+      m.material.emissive.setHex(done ? 0x1B7A44 : 0x2A54A4);
+      m.scale.setScalar(done ? 1.5 : 1);
+      m.visible = true;
+      m.userData.correct = mine;
+    });
+  }
+  function quizPaint() {
+    var el = document.getElementById('quizBar');
+    if (!QUIZ.on) { el.hidden = true; return; }
+    el.hidden = false;
+    if (QUIZ.i >= QUIZ.list.length) {
+      el.innerHTML = '<div class="qDone"><b>Klaar.</b> ' + QUIZ.list.length + ' kabels geprikt, ' +
+        (QUIZ.wrong === 0 ? 'zonder één fout.' : QUIZ.wrong + ' misprik' + (QUIZ.wrong > 1 ? 'ken' : '') + '.') +
+        '</div><button type="button" class="mmBtn" id="quizAgain">Opnieuw</button>' +
+        '<button type="button" class="mmBtn" id="quizStop">Stoppen</button>';
+      document.getElementById('quizAgain').onclick = function () { quizStart(); };
+      document.getElementById('quizStop').onclick = function () { quizStop(); };
+      return;
+    }
+    var t = QUIZ.list[QUIZ.i];
+    el.innerHTML = '<div class="qN">' + (QUIZ.i + 1) + '/' + QUIZ.list.length + '</div>' +
+      '<div class="qT">' + t.label + '</div>' +
+      '<div class="qHint" id="quizHint">Klik de twee bolletjes waar deze kabel in gaat.</div>' +
+      '<button type="button" class="mmBtn" id="quizStop">Stoppen</button>';
+    document.getElementById('quizStop').onclick = function () { quizStop(); };
+  }
+  function quizSay(txt, bad) {
+    var h = document.getElementById('quizHint');
+    if (!h) return;
+    h.textContent = txt;
+    h.className = 'qHint' + (bad ? ' bad' : ' good');
+  }
+  function quizPick(mesh) {
+    if (!QUIZ.on || QUIZ.i >= QUIZ.list.length) return;
+    var t = QUIZ.list[QUIZ.i];
+    if (!mesh.userData.correct) {
+      QUIZ.wrong++;
+      burst(150, 1.2, 0.24, 0.22, 'lowpass');
+      quizSay('Dat is een andere poort. ' + t.label, true);
+      return;
+    }
+    if (!QUIZ.picked) {
+      QUIZ.picked = mesh.userData.end;
+      blip(520, 700, 0.12, 0.1);
+      quizSay('Goed. Nu de andere kant.', false);
+      markState();
+      return;
+    }
+    if (QUIZ.picked === mesh.userData.end) return;
+    blip(700, 1050, 0.16, 0.16);
+    (cableMeshes[t.id] || []).forEach(function (m) {
+      m.visible = true; m.material.opacity = 1; m.material.transparent = false;
+      (m.userData.boots || []).forEach(function (b) { b.visible = true; });
+    });
+    QUIZ.picked = null; QUIZ.i++;
+    markState(); quizPaint();
+    dirty = true;
+  }
+  function quizStart() {
+    QUIZ.on = true; QUIZ.i = 0; QUIZ.wrong = 0; QUIZ.picked = null;
+    QUIZ.list = CABLES.filter(function (c) { return c.id !== 'ap'; });
+    if (mode === 'walk') setMode('orbit');
+    buildMarks();
+    markGroup.visible = true;
+    Object.keys(cableMeshes).forEach(function (id) {
+      cableMeshes[id].forEach(function (m) {
+        m.visible = false;
+        (m.userData.boots || []).forEach(function (b) { b.visible = false; });
+      });
+    });
+    document.getElementById('quizBtn').textContent = 'Stop oefenen';
+    document.getElementById('hint').hidden = true;
+    markState(); quizPaint(); dirty = true;
+  }
+  function quizStop() {
+    QUIZ.on = false; markGroup.visible = false;
+    document.getElementById('quizBtn').textContent = 'Oefenen';
+    document.getElementById('hint').hidden = false;
+    quizPaint(); pushState(); dirty = true;
+  }
+  document.getElementById('quizBtn').addEventListener('click', function () {
+    QUIZ.on ? quizStop() : quizStart();
+  });
+
+  /* ---------- manuals: klik op een apparaat ---------- */
+  var manualEl = document.getElementById('manualWrap'), sheetEl = document.getElementById('sheet');
+  var mDev = document.getElementById('mDev'), mTitle = document.getElementById('mTitle'),
+      mMeta = document.getElementById('mMeta'), mBody = document.getElementById('mBody');
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>]/g, function (c) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;' }[c];
+    });
+  }
+  var imgCache = {};
+  function renderPages(d) {
+    sheetEl.classList.add('pdf');
+    mBody.innerHTML = '';
+    d.pages.forEach(function (pid, i) {
+      var fig = document.createElement('figure');
+      fig.className = 'mPage';
+      fig.style.setProperty('--i', i);
+      fig.innerHTML = '<div class="mLoading">Pagina ' + (i + 1) + ' laden…</div>' +
+                      '<div class="mPageNo">' + (i + 1) + ' / ' + d.pages.length + '</div>';
+      mBody.appendChild(fig);
+      var img = new Image();
+      img.alt = 'Pagina ' + (i + 1);
+      img.onload = function () {
+        var ph = fig.querySelector('.mLoading');
+        if (ph) ph.replaceWith(img); else fig.insertBefore(img, fig.firstChild);
+      };
+      img.onerror = function () {
+        var ph = fig.querySelector('.mLoading');
+        if (ph) ph.textContent = 'Pagina ' + (i + 1) + ' kon niet geladen worden.';
+      };
+      img.src = 'data/pages/' + pid + '.' + (PAGE_EXT[pid] || 'jpg');
+    });
+  }
+  function renderManual(d) {
+    sheetEl.classList.remove('pdf');
+    mTitle.textContent = d.title || 'Manual';
+    mMeta.textContent = [d.brand, d.version ? 'v' + d.version : '',
+                         (d.steps || []).length + ' stappen'].filter(Boolean).join('   ·   ');
+    document.getElementById('mFootL').textContent = d.brand || 'KOEL Retail';
+    if (d.kind === 'pdf' && (d.pages || []).length) {
+      mMeta.textContent = [d.brand, d.version ? 'v' + d.version : '',
+                           d.pages.length + " pagina's"].filter(Boolean).join('   ·   ');
+      renderPages(d);
+      return;
+    }
+    var html = '<ol>';
+    (d.steps || []).forEach(function (s, i) {
+      html += '<li style="--i:' + i + '"><h4>' + esc(s.title) + '</h4>' +
+              (s.body ? '<p>' + esc(s.body) + '</p>' : '') + '</li>';
+    });
+    mBody.innerHTML = html + '</ol>';
+  }
+  var openKey = null, wantLock = false;
+  function showManual(man) {
+    openKey = man.key;
+    if (locked()) { wantLock = true; document.exitPointerLock(); }   // muis terug om te lezen
+    W.keys = {}; W.ax = W.az = 0; W.vx = W.vz = 0;                   // en meteen stilstaan
+    manualEl.hidden = false;
+    blip(520, 760, 0.10, 0.12);
+    sheetEl.style.animation = 'none'; void sheetEl.offsetWidth; sheetEl.style.animation = '';
+    mDev.textContent = man.name;
+    paintSheet();
+  }
+  function paintSheet() {
+    if (!openKey || manualEl.hidden) return;
+    var d = MANUALS[LINKS[openKey]];
+    if (d) { renderManual(d); return; }
+    mTitle.textContent = 'Nog geen manual';
+    mMeta.textContent = '';
+    document.getElementById('mFootL').textContent = 'KOEL Retail';
+    mBody.innerHTML = '<p class="mEmpty">Aan dit apparaat hangt nog geen manual. Schrijf er een in <b>Manuals</b> onder de tekening en koppel hem hier aan — dan staat hij er meteen in, ook voor je collega\'s.</p>';
+  }
+  onData(paintSheet);
+  function closeManual() {
+    manualEl.hidden = true;
+    if (wantLock && W.fp && mode === 'walk') { wantLock = false; grabMouse(); }
+    wantLock = false;
+  }
+  document.getElementById('mClose').addEventListener('click', closeManual);
+  document.getElementById('manualScrim').addEventListener('click', closeManual);
+  window.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') closeManual(); });
+
+  /* ---------- aanwijzen ---------- */
+  var ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  function hover(ev) {
+    var b = stage.getBoundingClientRect();
+    ndc.x = ((ev.clientX - b.left) / b.width) * 2 - 1;
+    ndc.y = -((ev.clientY - b.top) / b.height) * 2 + 1;
+    ray.setFromCamera(ndc, camera);
+    var list = [];
+    Object.keys(cableMeshes).forEach(function (k) {
+      cableMeshes[k].forEach(function (m) { if (m.visible) list.push(m); });
+    });
+    var hit = ray.intersectObjects(list, false)[0];
+    if (hit) { setHot(hit.object.userData.cable, null); }
+    else {
+      var hm = ray.intersectObjects(monitorPicks, false)[0];
+      setHot(null, hm ? hm.object.userData.pc : null);
+    }
+    stage.classList.toggle('pick', !!hit || !!ray.intersectObjects(monitorPicks, false)[0]);
+  }
+  function setHot(id, pcIdx) {
+    if (pcIdx === undefined) pcIdx = null;
+    if (state.hot === id && state.pc === pcIdx) return;
+    state.hot = id; state.pc = pcIdx; pushState();
+  }
+
+  /* ---------- toestand toepassen ---------- */
+
+  function matsOf(mesh) { return Array.isArray(mesh.material) ? mesh.material : [mesh.material]; }
+  function allMats(key) {
+    var list = matsOf(DEV[key].mesh);
+    (DEV[key].extra || []).forEach(function (m) { list = list.concat(matsOf(m)); });
+    return list;
+  }
+  var devBase = {};
+  Object.keys(DEV).forEach(function (k) {
+    devBase[k] = allMats(k).map(function (m) { return m.color.clone(); });
+  });
+  function setDev(key, opacity, tint) {
+    allMats(key).forEach(function (m, i) {
+      m.color.copy(devBase[key][i]);
+      if (tint > 0) m.color.lerp(new THREE.Color(0x30343a), tint);
+      m.transparent = opacity < 1;
+      m.opacity = opacity;
+      m.depthWrite = opacity > 0.9;
+      m.needsUpdate = true;
+    });
+  }
+
+  onState(function (s) {
+    var hotCable = null;
+    if (QUIZ.on) return;
+    CABLES.forEach(function (c) {
+      // filter en failover bepalen of de kabel er überhaupt is
+      var alive = kindMatches(c.kind, s.filter) && !(s.failing && c.owner.indexOf('pa1') > -1);
+      var hot = s.hot === c.id, gone = !!s.hot && !hot;
+      if (hot) hotCable = c;
+      (cableMeshes[c.id] || []).forEach(function (m) {
+        m.visible = alive;
+        m.material.color.copy(m.userData.base);
+        m.material.emissive.setHex(hot ? 0x3f3f3f : 0x000000);
+        m.material.transparent = gone;
+        m.material.opacity = gone ? 0 : 1;
+        m.material.depthWrite = !gone;
+        m.material.needsUpdate = true;
+        m.castShadow = !gone;               // anders blijft de schaduw van een verborgen kabel staan
+        (m.userData.boots || []).forEach(function (b) { b.visible = alive && !gone; });
+      });
+    });
+    // apparaten die niets met de aangewezen kabel te maken hebben treden terug
+    Object.keys(DEV).forEach(function (k) {
+      if (s.failing && k === 'pa1') return setDev(k, 0.30, 0.78);
+      if (hotCable && hotCable.owner.indexOf(k) === -1) return setDev(k, 0.30, 0.55);
+      setDev(k, 1, 0);
+    });
+    PCS.forEach(function (p, i) {
+      p.target = (s.pc === i) ? 1 : 0;
+      var recede = !!hotCable || ((s.pc !== null && s.pc !== undefined) && s.pc !== i);
+      p.mats.forEach(function (m, k) {                 // verbleken, niet doorzichtig:
+        m.color.copy(p.base[k]);                        // anders schemert alles door de pc heen
+        if (recede) m.color.lerp(new THREE.Color(0xCEC7B6), 0.7);
+        m.transparent = false;
+        m.opacity = 1;
+        m.depthWrite = true;
+        m.needsUpdate = true;
+      });
+    });
+    alarm.visible = s.failing;
+    statusEl.textContent = s.hot ? cableLabel(s.hot)
+      : (s.pc !== null && s.pc !== undefined) ?
+        PCS[s.pc].msg
+      : s.failing ? 'D01 uit — X01-1 verliest zijn trunk en zijn POLR-pad, en het bypass-paar is verbroken. Via de stack blijft hij bij D02, maar INET1 is weg.'
+      : s.filter === 'all' ? 'Wijs een kabel aan in het model of in de lijst hieronder.'
+      : ({ wan:'De twee internetlijnen: INET1 op D01 poort 3, INET2 op D02 poort 3.',
+           plr:'POLR: 5G/LTE binnen op X01-1 poort 4, en vanaf poort 5 van elke switch naar poort 2 van de ION.',
+           ha:'Het bypass-paar tussen D01 en D02: poort 1 naar 4 en poort 4 naar 1, gekruist.',
+           lan:'De trunks van poort 1 van elke switch naar poort 5 van zijn ION, plus de stack tussen de switches.',
+           ap:'De dertig Cisco 9120 access points op de middelste plank van Bench 4, per twee gestapeld: X01-1 poort 11-20, X01-2 poort 11-20 en de derde Cisco poort 5-20.',
+           con:'De grijze console-kabels: van de WTI achterlangs naar de console-poort van elke switch.' })[s.filter];
+    statusEl.classList.toggle('warn', s.failing);
+    dirty = true;
+  });
+
+  /* ---------- formaat en tekenlus ---------- */
+  function resize() {
+    var w = stage.clientWidth;
+    var h = Math.round(Math.max(380, Math.min(680, w * 0.64)));
+    stage.style.height = h + 'px';
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix();
+    dirty = true;
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  updateCamera();
+  pushState();
+  (function loop() {
+    requestAnimationFrame(loop);
+    stepWalk(performance.now());
+    if (mode !== 'walk' && Math.abs(target.x - wantX) > 0.06) {   // glijdt naar de gekozen bench
+      target.x += (wantX - target.x) * 0.11;
+      updateCamera();
+    }
+    PCS.forEach(function (p) {                       // pc's soepel in- en uitschuiven
+      if (Math.abs(p.target - p.t) < 0.002) { if (p.t !== p.target) { p.t = p.target; p.place(p.t); dirty = true; } return; }
+      p.t += (p.target - p.t) * 0.16;
+      p.place(p.t);
+      dirty = true;
+    });
+    if (!dirty) return;
+    dirty = false;
+    renderer.render(scene, camera);
+  })();
+})();
+
+/* ================================================================
+   2. Platte poorttekeningen — hier lees je het exacte poortnummer af
+   ================================================================ */
+(function () {
+  "use strict";
+  var K = { pa:'#EFEFEA', paTop:'#FBFBF8', paD:'#D3D3CB', paPanel:'#BEC0BB', paDeep:'#8E918C',
+            sw:'#C2C6C4', swTop:'#D6D9D7', swD:'#9EA3A1', swPanel:'#AAAFAD',
+            port:'#232628', portIn:'#3C4145', lan:COL.lan, lanD:COL.lanD };
+  var CC = { wan:[COL.wan, COL.wanD], plr:[COL.plr, COL.plrD], ha:[COL.ha, COL.haD],
+             lan:[COL.lan, COL.lanD], stk:[COL.stk, COL.stkD], con:[COL.con, COL.conD] };
+
+  function e(tag, attrs, inner) {
+    var s = '<' + tag;
+    for (var k in attrs) if (attrs[k] !== undefined) s += ' ' + k + '="' + attrs[k] + '"';
+    return inner === undefined ? s + '/>' : s + '>' + inner + '</' + tag + '>';
+  }
+  function r(x, y, w, h, fill, rx) { return e('rect', { x:x, y:y, width:w, height:h, rx:rx || 0, fill:fill }); }
+  function t(x, y, str, o) {
+    o = o || {};
+    return e('text', { x:x, y:y, 'text-anchor':o.a || 'start',
+      style:'fill:' + (o.fill || 'var(--ink)') + ';font-family:' + (o.f || "'IBM Plex Mono',monospace") +
+            ';font-size:' + (o.s || 11) + 'px;font-weight:' + (o.w || 500) }, str);
+  }
+  function tape(x, y, w, h, txt) {
+    return r(x, y, w, h, '#FFFFFF', 3) +
+      e('rect', { x:x + .5, y:y + .5, width:w - 1, height:h - 1, rx:3, fill:'none', stroke:'#9AA0A6' }) +
+      t(x + w / 2, y + h - 8, txt, { a:'middle', s:14, w:600, fill:'#15181C' });
+  }
+
+  var fx = 30, fy = 74, fw = 560, fh = 92;
+
+  /* --- Palo Alto --- */
+  var F = r(fx, fy, fw, fh, K.pa, 4) + r(fx, fy, fw, 6, K.paTop, 3) + r(fx, fy + fh - 6, fw, 6, K.paD);
+  F += e('rect', { x:fx + .5, y:fy + .5, width:fw - 1, height:fh - 1, rx:4, fill:'none', stroke:'rgba(0,0,0,.3)' });
+  F += r(fx + 10, fy + 10, fw - 20, fh - 20, K.paPanel, 3);
+  F += t(fx + 20, fy + 52, 'paloalto', { s:14, w:600, fill:COL.orange, f:"'Public Sans',sans-serif" });
+  F += r(fx + 92, fy + 32, 16, 22, K.port, 2) + r(fx + 114, fy + 38, 14, 10, K.port, 2);
+  for (var col = 0; col < 5; col++) {                    // tien poorten in vijf kolommen
+    var cx0 = fx + 128 + col * 58;
+    for (var row = 0; row < 2; row++) {
+      var num = col * 2 + row + 1, u = PA_USE[num], py = fy + 16 + row * 34;
+      F += r(cx0, py, 46, 26, K.port, 2) + r(cx0 + 6, py + 5, 34, 16, K.portIn, 2);
+      if (u) {
+        var cc = CC[u.c];
+        F += e('g', { class:'pm', 'data-cable':u.id, 'data-kind':u.c },
+          r(cx0 + 4, py + 3, 38, 20, cc[0], 2) + r(cx0 + 10, py + 7, 26, 12, cc[1], 1) +
+          e('line', { x1:cx0 + 23, y1:row ? py + 26 : py, x2:cx0 + 23, y2:row ? fy + fh + 12 : fy - 12,
+                      style:'stroke:' + cc[1] + ';stroke-width:1.6;stroke-dasharray:3 3' }));
+      }
+      var ny = row ? fy + fh + 28 : fy - 18, sy = row ? fy + fh + 42 : fy - 32;
+      F += t(cx0 + 23, ny, String(num), { a:'middle', s:15, w:600, fill:u ? CC[u.c][1] : 'var(--ink-3)' });
+      if (u) F += t(cx0 + 23, sy, u.to, { a:'middle', s:10, w:500, fill:'var(--ink-2)' });
+    }
+  }
+  F += e('rect', { x:fx + 184, y:fy + 12, width:52, height:68, rx:3, fill:'none',
+                   style:'stroke:#D0453A;stroke-width:2' });      // bypass-paar
+  F += e('circle', { cx:fx + 448, cy:fy + 46, r:11, fill:'#4A4F54' }) +
+       e('circle', { cx:fx + 476, cy:fy + 46, r:11, fill:'#4A4F54' });
+  F += e('circle', { cx:fx + 502, cy:fy + 46, r:7, fill:K.port });
+  ['#39D07A', '#E9C21B', '#E24A3C'].forEach(function (c, i) {
+    F += e('circle', { cx:fx + 520, cy:fy + 34 + i * 12, r:3.4, fill:c });
+  });
+  F += t(fx + 534, fy + 52, 'ION 1200-S', { s:11, w:700, fill:COL.orange, f:"'Public Sans',sans-serif" });
+  document.getElementById('facePa').innerHTML = F;
+
+  /* --- Cisco --- */
+  var SW_USE = {
+    0:{ id:'t1', c:'lan', row:0, num:1, to:'trunk \u2192 D0x p5', lx:106 },
+    1:{ id:'p0', c:'plr', row:1, num:4, to:'POLR 5G in', lx:200, below:true },
+    2:{ id:'p1', c:'plr', row:0, num:5, to:'POLR \u2192 D0x p2', lx:300 }
+  };
+  var G = r(fx, fy, fw, fh, K.sw, 4) + r(fx, fy, fw, 6, K.swTop, 3) + r(fx, fy + fh - 6, fw, 6, K.swD);
+  G += e('rect', { x:fx + .5, y:fy + .5, width:fw - 1, height:fh - 1, rx:4, fill:'none', stroke:'rgba(0,0,0,.3)' });
+  G += r(fx + 8, fy + 8, 26, fh - 16, K.swPanel, 3);
+  G += e('circle', { cx:fx + 21, cy:fy + 22, r:3.4, fill:'#7E8583' }) + e('circle', { cx:fx + 21, cy:fy + 70, r:3.4, fill:'#7E8583' });
+  G += tape(fx + 42, fy + 32, 76, 26, 'X01-1');
+  for (var j = 0; j < 24; j++) {
+    var jx = fx + 128 + j * 16;
+    G += r(jx, fy + 22, 13, 20, K.port, 2) + r(jx, fy + 50, 13, 20, K.port, 2);
+    var use = SW_USE[j];
+    if (use) {
+      var pc = CC[use.c], py2 = use.row ? fy + 50 : fy + 22;
+      var ey = use.below ? fy + fh + 12 : fy - 12, ny2 = use.below ? fy + fh + 28 : fy - 18,
+          sy2 = use.below ? fy + fh + 42 : fy - 32, jy = use.below ? py2 + 20 : py2;
+      G += e('g', { class:'pm', 'data-cable':use.id, 'data-kind':use.c },
+        r(jx, py2, 13, 20, pc[0], 2) + r(jx + 3, py2 + 5, 7, 10, pc[1], 1) +
+        e('path', { d:'M' + (jx + 6.5) + ',' + jy + ' L' + (jx + 6.5) + ',' + (jy + (use.below ? 6 : -6)) +
+                       ' L' + use.lx + ',' + ey,
+                    style:'fill:none;stroke:' + pc[1] + ';stroke-width:1.6;stroke-dasharray:3 3' }));
+      G += t(use.lx, ny2, String(use.num), { a:'middle', s:15, w:600, fill:pc[1] });
+      G += t(use.lx, sy2, use.to, { a:'middle', s:10, w:500, fill:'var(--ink-2)' });
+    }
+  }
+  G += r(fx + 520, fy + 20, 40, 52, K.swPanel, 3) + r(fx + 526, fy + 30, 28, 10, K.port, 2);
+  G += t(fx + 350, fy + fh + 28, 'kolom 1 = poort 1 en 2, kolom 2 = 3 en 4, enzovoort',
+         { a:'middle', s:10.5, w:400, fill:'var(--ink-3)', f:"'Public Sans',sans-serif" });
+  document.getElementById('faceSw').innerHTML = G;
+
+  /* --- koppeling met de rest --- */
+  var marks = [].slice.call(document.querySelectorAll('.pm'));
+  onState(function (s) {
+    marks.forEach(function (m) {
+      var offFilter = !kindMatches(m.getAttribute('data-kind'), s.filter);
+      m.classList.toggle('dim', offFilter || (!!s.hot && m.getAttribute('data-cable') !== s.hot));
+    });
+  });
+})();
+
+/* ================================================================
+   3b. Manual-editor — schrijft in dezelfde database als het blad
+   ================================================================ */
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var listEl = $('mmList'), stateEl = $('mmState'), edit = $('mmEditor'),
+      empty = $('mmEmpty'), paste = $('mmPaste'), stepsEl = $('mmSteps'), linksEl = $('mmLinks');
+  var cur = null, draft = null, writable = false;
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c];
+    });
+  }
+  function ids() { return Object.keys(MANUALS).sort(function (a, b) {
+    return (MANUALS[a].title || '').localeCompare(MANUALS[b].title || ''); }); }
+
+  function linkedNames(id) {
+    var out = [];
+    TARGETS.forEach(function (t) { if (LINKS[t.key] === id) out.push(t.name); });
+    return out;
+  }
+
+  function paintList() {
+    var all = ids();
+    listEl.innerHTML = all.map(function (id) {
+      var m = MANUALS[id], n = linkedNames(id).length;
+      return '<li><button type="button" data-id="' + id + '"' +
+             (cur === id ? ' aria-current="true"' : '') + '>' + esc(m.title || 'Zonder titel') +
+             '<small>' + ((m.steps || []).length) + ' stappen · ' +
+             (n ? n + ' apparaat' + (n > 1 ? 'en' : '') : 'nergens gekoppeld') + '</small></button></li>';
+    }).join('') || '<li><div class="mmNote">Nog geen manuals.</div></li>';
+    if (!writable) stateEl.textContent = 'Alleen-lezen in deze weergave — opslaan lukt niet.';
+    else stateEl.textContent = all.length + ' manual' + (all.length === 1 ? '' : 's') + ' in deze pagina.';
+  }
+
+  function paintSteps() {
+    stepsEl.innerHTML = draft.steps.map(function (s, i) {
+      return '<div class="mmStep" data-i="' + i + '"><div class="n">' + (i + 1) + '</div>' +
+        '<div class="f"><input type="text" class="sT" value="' + esc(s.title) + '" placeholder="Wat je doet">' +
+        '<textarea class="sB" rows="2" placeholder="Toelichting (mag leeg)">' + esc(s.body) + '</textarea></div>' +
+        '<button type="button" class="mmX" title="Stap weg">&times;</button></div>';
+    }).join('');
+  }
+  function paintLinks() {
+    var groups = {};
+    TARGETS.forEach(function (t) { (groups[t.group] = groups[t.group] || []).push(t); });
+    linksEl.innerHTML = Object.keys(groups).map(function (g) {
+      return groups[g].map(function (t) {
+        var on = LINKS[t.key] === cur;
+        return '<label><input type="checkbox" data-key="' + t.key + '"' + (on ? ' checked' : '') +
+               '>' + esc(t.name) + '</label>';
+      }).join('');
+    }).join('');
+  }
+  function openManualEdit(id) {
+    cur = id;
+    var m = MANUALS[id] || {};
+    draft = { title:m.title || '', brand:m.brand || '', version:m.version || '',
+              steps:(m.steps || []).map(function (s) { return { title:s.title || '', body:s.body || '' }; }) };
+    if (!draft.steps.length) draft.steps.push({ title:'', body:'' });
+    $('mmTitle').value = draft.title; $('mmBrand').value = draft.brand; $('mmVersion').value = draft.version;
+    paintSteps(); paintLinks();
+    edit.hidden = false; empty.hidden = true; paste.hidden = true;
+    paintList();
+  }
+  function collect() {
+    draft.title = $('mmTitle').value.trim();
+    draft.brand = $('mmBrand').value.trim();
+    draft.version = $('mmVersion').value.trim();
+    draft.steps = [].slice.call(stepsEl.querySelectorAll('.mmStep')).map(function (r) {
+      return { title:r.querySelector('.sT').value.trim(), body:r.querySelector('.sB').value.trim() };
+    }).filter(function (s) { return s.title || s.body; });
+  }
+
+  listEl.addEventListener('click', function (ev) {
+    var b = ev.target.closest('button[data-id]');
+    if (b) openManualEdit(b.getAttribute('data-id'));
+  });
+  $('mmAddStep').addEventListener('click', function () {
+    collect(); draft.steps.push({ title:'', body:'' }); paintSteps();
+  });
+  stepsEl.addEventListener('click', function (ev) {
+    if (!ev.target.classList.contains('mmX')) return;
+    var i = +ev.target.closest('.mmStep').getAttribute('data-i');
+    collect(); draft.steps.splice(i, 1);
+    if (!draft.steps.length) draft.steps.push({ title:'', body:'' });
+    paintSteps();
+  });
+  $('mmNew').addEventListener('click', function () {
+    var id = newId();
+    MANUALS[id] = { title:'', brand:'KOEL Retail', version:'1.0', steps:[] };
+    openManualEdit(id);
+    $('mmTitle').focus();
+  });
+
+  function save() {
+    collect();
+    dbP.then(function (db) {
+      if (!db) { stateEl.textContent = 'Opslaan lukt niet in deze weergave.'; return; }
+      var doc = { title:draft.title, brand:draft.brand, version:draft.version,
+                  steps:draft.steps, updatedAt:Date.now() };
+      var boxes = [].slice.call(linksEl.querySelectorAll('input[data-key]'));
+      var jobs = [db.doc('manuals/' + cur).set(doc)];
+      boxes.forEach(function (cb) {
+        var k = cb.getAttribute('data-key'), was = LINKS[k] === cur;
+        if (cb.checked && !was) jobs.push(db.doc('links/' + k).set({ manualId:cur }));
+        else if (!cb.checked && was) jobs.push(db.doc('links/' + k).set({ manualId:null }));
+      });
+      stateEl.textContent = 'Opslaan…';
+      return Promise.all(jobs).then(function () { stateEl.textContent = 'Opgeslagen.'; });
+    }).catch(function () { stateEl.textContent = 'Opslaan mislukt.'; });
+  }
+  $('mmSave').addEventListener('click', save);
+  $('mmDelete').addEventListener('click', function () {
+    if (!cur) return;
+    dbP.then(function (db) {
+      if (!db) return;
+      var jobs = [db.doc('manuals/' + cur).delete()];
+      TARGETS.forEach(function (t) { if (LINKS[t.key] === cur) jobs.push(db.doc('links/' + t.key).set({ manualId:null })); });
+      return Promise.all(jobs);
+    }).then(function () {
+      delete MANUALS[cur]; cur = null; draft = null;
+      edit.hidden = true; empty.hidden = false; paintList();
+    });
+  });
+
+  $('mmImport').addEventListener('click', function () {
+    edit.hidden = true; empty.hidden = true; paste.hidden = false; $('mmJson').focus();
+  });
+  $('mmPasteCancel').addEventListener('click', function () {
+    paste.hidden = true; empty.hidden = !!cur; edit.hidden = !cur;
+  });
+  $('mmPasteOk').addEventListener('click', function () {
+    var raw;
+    try { raw = JSON.parse($('mmJson').value); }
+    catch (e) { stateEl.textContent = 'Dat is geen geldige JSON.'; return; }
+    var list = Array.isArray(raw) ? raw : [raw];
+    dbP.then(function (db) {
+      if (!db) { stateEl.textContent = 'Importeren lukt niet in deze weergave.'; return; }
+      return Promise.all(list.map(function (m) {
+        var id = (typeof m.id === 'string' && /^[A-Za-z0-9_.~:@+-]{1,60}$/.test(m.id)) ? m.id : newId();
+        return db.doc('manuals/' + id).set({
+          title:m.title || 'Zonder titel', brand:m.brand || '', version:m.version || '',
+          steps:(m.steps || []).map(function (s) { return { title:s.title || '', body:s.body || '' }; }),
+          updatedAt:Date.now()
+        });
+      }));
+    }).then(function () {
+      $('mmJson').value = ''; paste.hidden = true; empty.hidden = false;
+      stateEl.textContent = list.length + ' manual' + (list.length === 1 ? '' : 's') + ' toegevoegd.';
+    }).catch(function () { stateEl.textContent = 'Importeren mislukt.'; });
+  });
+
+  dbP.then(function (db) { writable = !!db; paintList(); });
+  onData(function () { paintList(); if (cur && !draft) openManualEdit(cur); if (cur) paintLinks(); });
+  paintList();
+})();
+
+/* ================================================================
+   3. Knoppen en de kabellijst
+   ================================================================ */
+(function () {
+  "use strict";
+  [].forEach.call(document.querySelectorAll('.seg button'), function (b) {
+    b.addEventListener('click', function () {
+      [].forEach.call(document.querySelectorAll('.seg button'), function (o) { o.setAttribute('aria-pressed', String(o === b)); });
+      state.filter = b.getAttribute('data-filter'); pushState();
+    });
+  });
+  document.getElementById('fail').addEventListener('change', function (ev) {
+    state.failing = ev.target.checked; pushState();
+  });
+  [].forEach.call(document.querySelectorAll('#sched tbody tr'), function (tr) {
+    var id = tr.getAttribute('data-cable');
+    function on() { state.hot = id; pushState(); }
+    function off() { state.hot = null; pushState(); }
+    tr.addEventListener('mouseenter', on); tr.addEventListener('focus', on);
+    tr.addEventListener('mouseleave', off); tr.addEventListener('blur', off);
+  });
+  pushState();
+})();
+</script>
